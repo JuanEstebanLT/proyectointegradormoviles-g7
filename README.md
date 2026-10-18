@@ -63,7 +63,7 @@ El MVP contempla las siguientes capacidades:
 
 ## Alcance del MVP
 
-La primera versión funcional se enfoca en el registro manual y la consulta local de información financiera personal. El alcance comprende:
+La primera versión funcional se enfoca en el registro manual y la consulta de información financiera personal dentro de la aplicación. El alcance comprende:
 
 | Área | Alcance planificado |
 |---|---|
