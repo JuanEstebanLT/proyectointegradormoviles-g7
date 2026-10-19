@@ -165,9 +165,7 @@ Las credenciales de la API, cadenas de conexión y claves de despliegue no deben
 
 ## Modelo de datos (Diagrama ER)
 
-El siguiente diagrama modela los recursos que la API entrega a la aplicación, con sus atributos clave y las cardinalidades entre entidades.
-
-El diagrama se presenta como código fuente en sintaxis `erDiagram` de Mermaid. Para visualizarlo, copiar el bloque completo en el [Mermaid Live Editor](https://mermaid.live).
+El siguiente diagrama representa las entidades principales, sus atributos clave y las cardinalidades entre ellas.
 
 ```mermaid
 %%{init: {'er': {'layoutDirection': 'LR', 'entityPadding': 15, 'minEntityWidth': 140}}}%%
@@ -322,30 +320,14 @@ La pantalla de Saldo Inicial implementa la HU-01.
 
 ### Flujo de navegación
 
-```text
-Splash
-  │  transición automática
-  ▼
-Bienvenida
-  │  Comenzar
-  ▼
-Saldo Inicial                         Acceso  (PANTALLA 3)
-  │  Guardar saldo                      │  Iniciar sesión
-  │  envía saldo_inicial                │  envía credenciales
-  │  recibe usuario_id                  │  recibe token y usuario_id
-  └──────────────┬──────────────────────┘
-                 ▼
-          Dashboard  (PANTALLA 1)
-                 │
-                 │  seleccionar categoría
-                 │  envía categoria_id
-                 ▼
-     Detalle de Categoría  (PANTALLA 2)
-                 │
-                 │  registrar gasto
-                 │  envía categoria_id, tipo = GASTO
-                 ▼
-     Registro de movimiento  [pendiente de diseño]
+```mermaid
+flowchart TD
+    SPLASH[Splash] -->|transición automática| BIENVENIDA[Bienvenida]
+    BIENVENIDA -->|Comenzar| SALDO[Saldo Inicial]
+    SALDO -->|"Guardar saldo<br/>saldo_inicial · usuario_id"| DASHBOARD["Dashboard<br/>PANTALLA 1"]
+    ACCESO["Acceso<br/>PANTALLA 3"] -->|"Iniciar sesión<br/>credenciales · token · usuario_id"| DASHBOARD
+    DASHBOARD -->|"seleccionar categoría<br/>categoria_id"| DETALLE["Detalle de Categoría<br/>PANTALLA 2"]
+    DETALLE -->|"registrar gasto<br/>categoria_id · tipo = GASTO"| REGISTRO["Registro de movimiento<br/>pendiente de diseño"]
 ```
 
 ### Pantallas pendientes de diseño
@@ -409,9 +391,9 @@ La aplicación adopta el patrón **MVVM** con separación en capas y flujo unidi
 
 ### Diagrama de arquitectura
 
-Diagrama en sintaxis `flowchart` de Mermaid. Para visualizarlo, copiar el bloque en el [Mermaid Live Editor](https://mermaid.live).
+El siguiente diagrama resume las capas previstas y el flujo de datos de la aplicación.
 
-```text
+```mermaid
 flowchart TD
     subgraph UI["Capa UI · Jetpack Compose"]
         A1[AccesoScreen]
@@ -452,8 +434,7 @@ flowchart TD
         E3["Moshi · Serializacion"]
     end
 
-    API[("Finanzas G7 API
-    /api/v1")]
+    API[("Finanzas G7 API<br/>/api/v1")]
 
     A1 --> B1
     A2 --> B2
