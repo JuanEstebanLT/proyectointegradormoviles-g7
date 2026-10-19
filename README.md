@@ -169,7 +169,7 @@ El siguiente diagrama modela los recursos que la API entrega a la aplicación, c
 
 El diagrama se presenta como código fuente en sintaxis `erDiagram` de Mermaid. Para visualizarlo, copiar el bloque completo en el [Mermaid Live Editor](https://mermaid.live).
 
-```text
+```mermaid
 %%{init: {'er': {'layoutDirection': 'LR', 'entityPadding': 15, 'minEntityWidth': 140}}}%%
 erDiagram
     USUARIO {
@@ -196,6 +196,7 @@ erDiagram
         string nombre
         string tipo
         string color_hex
+        decimal presupuesto_mensual
         boolean es_predeterminada
         datetime creado_en
     }
@@ -381,7 +382,7 @@ https://stitch.withgoogle.com/preview/12478822216412901322?node-id=7d4f7b7b00ad4
 Durante la revisión del prototipo se identificaron las siguientes inconsistencias. Deben resolverse antes de iniciar la implementación:
 
 1. **Autenticación.** La pantalla de Bienvenida indica que no se requiere registro previo, mientras que la Pantalla 3 solicita credenciales. Debe definirse un único criterio de acceso.
-2. **Presupuesto por categoría.** La Pantalla 2 muestra un presupuesto mensual asignado a la categoría. La entidad `CATEGORIA` no contempla ese atributo. Debe incorporarse como `presupuesto_mensual` de tipo `decimal`.
+2. **Presupuesto por categoría.** ~~La Pantalla 2 muestra un presupuesto mensual asignado a la categoría. La entidad `CATEGORIA` no contempla ese atributo.~~ **Resuelto.** Se incorporó el atributo `presupuesto_mensual` de tipo `decimal` a la entidad `CATEGORIA` en el diagrama ER.
 3. **Medio de pago.** Las transacciones de la Pantalla 2 indican efectivo, tarjeta débito o transferencia. La entidad `MOVIMIENTO` no registra ese dato. Debe incorporarse como `medio_pago` o eliminarse del diseño.
 4. **Metas de ahorro.** El prototipo muestra metas con nombre propio y año. El modelo solo contempla `meta_ahorro_mensual` como atributo de `CONFIGURACION`, lo que no permite representarlas. Si se conservan, requieren una entidad `META` en relación 1:N con `USUARIO`.
 5. **Período mostrado.** El Dashboard y la Pantalla 2 exhiben un período que no corresponde a la fecha vigente del proyecto. Debe calcularse dinámicamente.
