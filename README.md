@@ -370,6 +370,12 @@ imagenes/c2-bienvenida.png
 imagenes/c3-saldo-inicial.png
 ```
 
+### Enlace al prototipo
+
+El proyecto interactivo completo, con las pantallas diseñadas y su flujo de navegación, está disponible públicamente en Google Stitch:
+
+https://stitch.withgoogle.com/preview/12478822216412901322?node-id=7d4f7b7b00ad42a0af3af3ec48ea438e
+
 ### Observaciones de coherencia
 
 Durante la revisión del prototipo se identificaron las siguientes inconsistencias. Deben resolverse antes de iniciar la implementación:
