@@ -167,6 +167,8 @@ Las credenciales de la API, cadenas de conexión y claves de despliegue no deben
 
 El siguiente diagrama representa las entidades principales, sus atributos clave y las cardinalidades entre ellas.
 
+[ Abrir Mermaid Live Editor](https://mermaid.live)
+
 ```mermaid
 %%{init: {'er': {'layoutDirection': 'LR', 'entityPadding': 15, 'minEntityWidth': 140}}}%%
 erDiagram
@@ -320,6 +322,8 @@ La pantalla de Saldo Inicial implementa la HU-01.
 
 ### Flujo de navegación
 
+[ Abrir Mermaid Live Editor](https://mermaid.live)
+
 ```mermaid
 flowchart TD
     SPLASH[Splash] -->|transición automática| BIENVENIDA[Bienvenida]
@@ -392,6 +396,8 @@ La aplicación adopta el patrón **MVVM** con separación en capas y flujo unidi
 ### Diagrama de arquitectura
 
 El siguiente diagrama resume las capas previstas y el flujo de datos de la aplicación.
+
+[ Abrir Mermaid Live Editor](https://mermaid.live)
 
 ```mermaid
 flowchart TD
