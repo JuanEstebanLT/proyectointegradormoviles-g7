@@ -1,57 +1,33 @@
 package com.example.proyecto_integrador_moviles_g7.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+// El prototipo solo define modo claro, por eso no se usa color dinámico ni tema oscuro
+private val ColoresFinanzasG7 = lightColorScheme(
+    primary = TealOscuro,
     onPrimary = Color.White,
+    primaryContainer = AguaClaro,
+    onPrimaryContainer = TealOscuro,
+    secondary = TealMedio,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    tertiary = Turquesa,
+    onTertiary = TealOscuro,
+    background = FondoClaro,
+    onBackground = Slate800,
+    surface = Color.White,
+    onSurface = Slate800,
+    onSurfaceVariant = Slate500,
+    outline = Slate200,
+    error = Rosa600
 )
 
 @Composable
-fun Proyectointegradormovilesg7Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+fun Proyectointegradormovilesg7Theme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = ColoresFinanzasG7,
         typography = Typography,
         content = content
     )
