@@ -5,9 +5,18 @@ import com.example.proyecto_integrador_moviles_g7.data.model.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.UUID
 
+data class AuthUiState(
+    val esDemostracion: Boolean = true,
+    val accesoDemostracionRealizado: Boolean = false
+)
+
 class AuthViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(AuthUiState())
+    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     // Lista de usuarios registrados
     private val _usuarios =
@@ -57,5 +66,13 @@ class AuthViewModel : ViewModel() {
         _usuarios.value = _usuarios.value.filter {
             it.id != id
         }
+    }
+
+    /**
+     * Habilita únicamente el flujo local de demostración. No valida credenciales,
+     * no crea una sesión y no representa autenticación real.
+     */
+    fun iniciarAccesoDemostracion() {
+        _uiState.update { it.copy(accesoDemostracionRealizado = true) }
     }
 }

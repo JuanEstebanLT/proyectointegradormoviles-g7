@@ -1,69 +1,91 @@
 package com.example.proyecto_integrador_moviles_g7.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
 import com.example.proyecto_integrador_moviles_g7.data.model.Movimiento
-import com.example.proyecto_integrador_moviles_g7.presentation.screens.categoriasEjemplo
-import com.example.proyecto_integrador_moviles_g7.presentation.screens.movimientosEjemplo
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
+import com.example.proyecto_integrador_moviles_g7.data.repository.FinanzasRepository
+import com.example.proyecto_integrador_moviles_g7.data.repository.FinanzasState
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import java.util.UUID
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDateTime
 
-class DashboardViewModel : ViewModel() {
+data class GastoCategoria(
+    val categoria: Categoria,
+    val total: Long
+)
 
-    private val _movimientos = MutableStateFlow(
-        movimientosEjemplo.mapIndexed { index, movimiento ->
+data class DashboardUiState(
+    val saldoInicial: Long = 0L,
+    val saldoDisponible: Long = 0L,
+    val totalIngresos: Long = 0L,
+    val totalGastos: Long = 0L,
+    val movimientosRecientes: List<Movimiento> = emptyList(),
+    val gastosPorCategoria: List<GastoCategoria> = emptyList(),
+    val categorias: List<Categoria> = emptyList()
+)
 
-            val categoria = categoriasEjemplo.firstOrNull {
-                it.id == movimiento.categoriaId
-            }?.nombre ?: "Sin categoría"
+class DashboardViewModel(
+    private val repository: FinanzasRepository
+) : ViewModel() {
 
-            Movimiento(
-                id = "ejemplo_${index + 1}",
-                descripcion = movimiento.titulo,
-                monto = movimiento.monto.toDouble(),
-                tipo = if (movimiento.monto < 0) "Gasto" else "Ingreso",
-                categoria = categoria,
-                fecha = movimiento.detalle
-            )
-        }
-    )
-
-    val movimientos: StateFlow<List<Movimiento>> =
-        _movimientos.asStateFlow()
+    val uiState: StateFlow<DashboardUiState> = repository.state
+        .map(::crearUiState)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, crearUiState(repository.state.value))
 
     fun agregarMovimiento(
         descripcion: String,
-        monto: Double,
-        tipo: String,
-        categoria: String,
-        fecha: String
-    ) {
-        if (
-            descripcion.isBlank() ||
-            categoria.isBlank() ||
-            fecha.isBlank() ||
-            monto <= 0 ||
-            (tipo != "Gasto" && tipo != "Ingreso")
-        ) {
-            return
-        }
+        monto: Long,
+        tipo: TipoMovimiento,
+        categoriaId: Int,
+        fecha: LocalDateTime = LocalDateTime.now(),
+        medioPago: String = "Efectivo"
+    ): Boolean = repository.agregarMovimiento(
+        descripcion,
+        monto,
+        tipo,
+        categoriaId,
+        fecha,
+        medioPago
+    )
 
-        val nuevoMovimiento = Movimiento(
-            id = UUID.randomUUID().toString(),
-            descripcion = descripcion.trim(),
-            monto = if (tipo == "Gasto") -monto else monto,
-            tipo = tipo,
-            categoria = categoria.trim(),
-            fecha = fecha
-        )
+    fun eliminarMovimiento(id: String): Boolean = repository.eliminarMovimiento(id)
 
-        _movimientos.value = _movimientos.value + nuevoMovimiento
-    }
+    companion object {
+        fun factory(repository: FinanzasRepository): ViewModelProvider.Factory =
+            simpleViewModelFactory { DashboardViewModel(repository) }
 
-    fun eliminarMovimiento(id: String) {
-        _movimientos.value = _movimientos.value.filter {
-            it.id != id
+        fun crearUiState(state: FinanzasState): DashboardUiState {
+            val ingresos = state.movimientos
+                .filter { it.tipo == TipoMovimiento.INGRESO }
+                .sumOf { it.monto }
+            val gastos = state.movimientos
+                .filter { it.tipo == TipoMovimiento.GASTO }
+                .sumOf { it.monto }
+            val gastosPorCategoria = state.categorias
+                .filter { it.tipo == TipoMovimiento.GASTO }
+                .map { categoria ->
+                    GastoCategoria(
+                        categoria = categoria,
+                        total = state.movimientos
+                            .filter { it.tipo == TipoMovimiento.GASTO && it.categoriaId == categoria.id }
+                            .sumOf { it.monto }
+                    )
+                }
+
+            return DashboardUiState(
+                saldoInicial = state.saldoInicial,
+                saldoDisponible = state.saldoInicial + ingresos - gastos,
+                totalIngresos = ingresos,
+                totalGastos = gastos,
+                movimientosRecientes = state.movimientos.sortedByDescending { it.fecha }.take(5),
+                gastosPorCategoria = gastosPorCategoria,
+                categorias = state.categorias
+            )
         }
     }
 }

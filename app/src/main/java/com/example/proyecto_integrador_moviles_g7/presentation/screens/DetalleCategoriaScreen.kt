@@ -54,10 +54,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
+import com.example.proyecto_integrador_moviles_g7.data.repository.InMemoryFinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraSuperior
 import com.example.proyecto_integrador_moviles_g7.presentation.components.FilaMovimiento
 import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
 import com.example.proyecto_integrador_moviles_g7.presentation.components.formatoCop
+import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.DetalleCategoriaViewModel
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar800
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar900
@@ -82,15 +87,29 @@ import java.util.Locale
 
 @Composable
 fun DetalleCategoriaScreen(
-    categoriaId: Int,
+    viewModel: DetalleCategoriaViewModel,
     onAtras: () -> Unit
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pendiente = { nombre: String ->
         Toast.makeText(context, "$nombre: pendiente de implementar", Toast.LENGTH_SHORT).show()
     }
-    val categoria = categoriasEjemplo.firstOrNull { it.id == categoriaId } ?: categoriasEjemplo.first()
-    val movimientos = movimientosEjemplo.filter { it.categoriaId == categoria.id }
+    val categoria = uiState.categoria
+    if (categoria == null) {
+        Column(Modifier.fillMaxSize().background(FondoClaro)) {
+            BarraSuperior(titulo = "Categoría", onAtras = onAtras)
+            Text(
+                "Categoría no encontrada",
+                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                textAlign = TextAlign.Center,
+                color = Slate500
+            )
+        }
+        return
+    }
+    val movimientos = uiState.movimientos
+    val estilo = estiloCategoria(categoria.id)
 
     Column(
         modifier = Modifier
@@ -130,18 +149,16 @@ fun DetalleCategoriaScreen(
                 Text("Detalle de Categoría • Gastos", fontSize = 12.sp, color = Slate500, modifier = Modifier.padding(top = 2.dp))
             }
 
-            TarjetaPresupuesto(categoria)
+            TarjetaPresupuesto(categoria, uiState.gastoCategoria)
 
-            val promedio = if (movimientos.isEmpty()) 0L else categoria.gastado / movimientos.size
-            val porcentajeTotal = categoria.gastado * 100f / totalGastosEjemplo
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Metrica(Modifier.weight(1f), Icons.Outlined.Calculate, "Promedio/gasto", formatoCop(promedio))
+                Metrica(Modifier.weight(1f), Icons.Outlined.Calculate, "Promedio/gasto", formatoCop(uiState.promedio))
                 Metrica(Modifier.weight(1f), Icons.AutoMirrored.Outlined.ReceiptLong, "Movimientos", "${movimientos.size} compras")
                 Metrica(
                     Modifier.weight(1f),
                     Icons.Outlined.PieChart,
                     "% del total",
-                    String.format(Locale.forLanguageTag("es-CO"), "%.1f%%", porcentajeTotal),
+                    String.format(Locale.forLanguageTag("es-CO"), "%.1f%%", uiState.porcentajeDelTotal),
                     fondo = Crema,
                     colorIcono = Ambar800,
                     colorTitulo = Ambar800.copy(alpha = 0.8f),
@@ -175,13 +192,14 @@ fun DetalleCategoriaScreen(
                 }
                 movimientos.forEach { movimiento ->
                     FilaMovimiento(
-                        icono = movimiento.icono,
-                        fondoIcono = movimiento.fondoIcono,
-                        colorIcono = movimiento.colorIcono,
-                        titulo = movimiento.titulo,
-                        detalle = movimiento.detalle,
-                        monto = movimiento.monto,
-                        colorMonto = Rosa600
+                        icono = estilo.icono,
+                        fondoIcono = estilo.fondoIcono,
+                        colorIcono = estilo.color,
+                        titulo = movimiento.descripcion,
+                        detalle = detalleMovimiento(movimiento, categoria.nombre),
+                        monto = movimiento.montoConSigno,
+                        colorMonto = Rosa600,
+                        onEliminar = { viewModel.eliminarMovimiento(movimiento.id) }
                     )
                 }
             }
@@ -211,9 +229,12 @@ fun DetalleCategoriaScreen(
 }
 
 @Composable
-private fun TarjetaPresupuesto(categoria: CategoriaEjemplo) {
-    val avance = (categoria.gastado.toFloat() / categoria.presupuesto).coerceIn(0f, 1f)
-    val restante = categoria.presupuesto - categoria.gastado
+private fun TarjetaPresupuesto(categoria: Categoria, gastado: Long) {
+    val estilo = estiloCategoria(categoria.id)
+    val avance = if (categoria.presupuesto == 0L) 0f else {
+        (gastado.toFloat() / categoria.presupuesto).coerceIn(0f, 1f)
+    }
+    val restante = categoria.presupuesto - gastado
     val saludable = avance < 0.8f
 
     Column(
@@ -226,7 +247,7 @@ private fun TarjetaPresupuesto(categoria: CategoriaEjemplo) {
             Column(Modifier.weight(1f)) {
                 Text("Consumo Mensual", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = AguaClaro.copy(alpha = 0.8f))
                 Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(top = 4.dp)) {
-                    Text(formatoCop(categoria.gastado), fontSize = 30.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(formatoCop(gastado), fontSize = 30.sp, fontWeight = FontWeight.Black, color = Color.White)
                     Spacer(Modifier.width(8.dp))
                     Text("COP", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Turquesa, modifier = Modifier.padding(bottom = 6.dp))
                 }
@@ -237,7 +258,7 @@ private fun TarjetaPresupuesto(categoria: CategoriaEjemplo) {
                     .background(Turquesa, RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(categoria.icono, null, tint = TealOscuro, modifier = Modifier.size(26.dp))
+                Icon(estilo.icono, null, tint = TealOscuro, modifier = Modifier.size(26.dp))
             }
         }
 
@@ -353,7 +374,13 @@ private fun SelectorPeriodo() {
 @Preview(showBackground = true, heightDp = 1100)
 @Composable
 private fun DetalleCategoriaScreenPreview() {
+    val previewViewModel: DetalleCategoriaViewModel = viewModel(
+        factory = DetalleCategoriaViewModel.factory(2, InMemoryFinanzasRepository())
+    )
     Proyectointegradormovilesg7Theme {
-        DetalleCategoriaScreen(categoriaId = 2, onAtras = {})
+        DetalleCategoriaScreen(
+            viewModel = previewViewModel,
+            onAtras = {}
+        )
     }
 }

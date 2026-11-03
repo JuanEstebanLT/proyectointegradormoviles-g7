@@ -67,7 +67,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
+import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.AuthViewModel
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar700
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar900
@@ -85,10 +88,12 @@ import com.example.proyecto_integrador_moviles_g7.ui.theme.Turquesa
 
 @Composable
 fun AccesoScreen(
+    viewModel: AuthViewModel,
     onIniciarSesion: () -> Unit,
     onRegistrarse: () -> Unit
 ) {
     val context = LocalContext.current
+    val authState by viewModel.uiState.collectAsStateWithLifecycle()
     var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
     var mostrarContrasena by remember { mutableStateOf(false) }
@@ -155,12 +160,15 @@ fun AccesoScreen(
                 }
 
                 Button(
-                    onClick = onIniciarSesion,
+                    onClick = {
+                        viewModel.iniciarAccesoDemostracion()
+                        onIniciarSesion()
+                    },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = TealOscuro)
                 ) {
-                    Text("Iniciar Sesión", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Entrar en modo demostración", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(8.dp))
                     Icon(Icons.AutoMirrored.Outlined.Login, null, modifier = Modifier.size(18.dp))
                 }
@@ -191,7 +199,11 @@ fun AccesoScreen(
                     Icon(Icons.Outlined.Security, null, tint = Ambar700, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        "Tus datos viajan protegidos mediante conexión cifrada (HTTPS).",
+                        if (authState.esDemostracion) {
+                            "Demostración local: las credenciales no se validan y no se crea una sesión segura."
+                        } else {
+                            "Acceso local"
+                        },
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
                         color = Ambar900
@@ -285,7 +297,7 @@ private fun EncabezadoMarca() {
         Text("Bienvenido de nuevo", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(Modifier.height(4.dp))
         Text(
-            "Ingresa tus credenciales para acceder a tus finanzas seguras",
+            "Explora el prototipo con datos temporales almacenados en memoria",
             fontSize = 12.sp,
             color = AguaClaro.copy(alpha = 0.8f),
             textAlign = TextAlign.Center,
@@ -327,7 +339,12 @@ private fun CampoTexto(
 @Preview(showBackground = true, heightDp = 900)
 @Composable
 private fun AccesoScreenPreview() {
+    val previewViewModel: AuthViewModel = viewModel()
     Proyectointegradormovilesg7Theme {
-        AccesoScreen(onIniciarSesion = {}, onRegistrarse = {})
+        AccesoScreen(
+            viewModel = previewViewModel,
+            onIniciarSesion = {},
+            onRegistrarse = {}
+        )
     }
 }
