@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AddCircle
@@ -37,16 +38,21 @@ import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -57,13 +63,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
+import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
+import com.example.proyecto_integrador_moviles_g7.data.repository.InMemoryFinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.presentation.components.FilaMovimiento
 import com.example.proyecto_integrador_moviles_g7.presentation.components.LogoG7
 import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
 import com.example.proyecto_integrador_moviles_g7.presentation.components.formatoCop
+import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.DashboardViewModel
+import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.GastoCategoria
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Crema
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda300
@@ -97,8 +111,13 @@ fun periodoActual(fecha: LocalDate = LocalDate.now()): String =
         .replaceFirstChar { it.titlecase(localeColombia) }
 
 @Composable
-fun DashboardScreen(onCategoriaClick: (categoriaId: Int) -> Unit) {
+fun DashboardScreen(
+    viewModel: DashboardViewModel,
+    onCategoriaClick: (categoriaId: Int) -> Unit
+) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var tipoDialogo by rememberSaveable { mutableStateOf<TipoMovimiento?>(null) }
     val pendiente = { nombre: String ->
         Toast.makeText(context, "$nombre: pantalla pendiente de diseño", Toast.LENGTH_SHORT).show()
     }
@@ -138,11 +157,16 @@ fun DashboardScreen(onCategoriaClick: (categoriaId: Int) -> Unit) {
                 )
             }
 
-            TarjetaSaldo(saldo = 2_850_000, ingresos = 2_500_000, gastos = totalGastosEjemplo)
+            TarjetaSaldo(
+                saldo = uiState.saldoDisponible,
+                saldoInicial = uiState.saldoInicial,
+                ingresos = uiState.totalIngresos,
+                gastos = uiState.totalGastos
+            )
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
-                    onClick = { pendiente("Agregar ingreso") },
+                    onClick = { tipoDialogo = TipoMovimiento.INGRESO },
                     modifier = Modifier.weight(1f).height(48.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Turquesa, contentColor = TealOscuro),
@@ -153,7 +177,7 @@ fun DashboardScreen(onCategoriaClick: (categoriaId: Int) -> Unit) {
                     Text("Agregar Ingreso", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
                 Button(
-                    onClick = { pendiente("Registrar gasto") },
+                    onClick = { tipoDialogo = TipoMovimiento.GASTO },
                     modifier = Modifier.weight(1f).height(48.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Crema, contentColor = Rosa700),
@@ -165,7 +189,11 @@ fun DashboardScreen(onCategoriaClick: (categoriaId: Int) -> Unit) {
                 }
             }
 
-            GastosPorCategoria(onCategoriaClick = onCategoriaClick)
+            GastosPorCategoria(
+                gastos = uiState.gastosPorCategoria,
+                totalGastos = uiState.totalGastos,
+                onCategoriaClick = onCategoriaClick
+            )
 
             MetaAhorro(onClick = { pendiente("Ahorro") })
 
@@ -180,30 +208,45 @@ fun DashboardScreen(onCategoriaClick: (categoriaId: Int) -> Unit) {
                         modifier = Modifier.clickable { pendiente("Movimientos") }
                     )
                 }
-                FilaMovimiento(
-                    icono = Icons.Outlined.Payments,
-                    fondoIcono = Turquesa.copy(alpha = 0.3f),
-                    colorIcono = TealOscuro,
-                    titulo = "Pago de nómina quincenal",
-                    detalle = "Ingreso • Hoy, 8:30 AM",
-                    monto = 1_250_000,
-                    colorMonto = Esmeralda600,
-                    colorDetalle = Esmeralda700,
-                    fondoDetalle = Esmeralda50
-                )
-                val ultimoGasto = movimientosEjemplo.first { it.categoriaId == 2 }
-                FilaMovimiento(
-                    icono = ultimoGasto.icono,
-                    fondoIcono = ultimoGasto.fondoIcono,
-                    colorIcono = Rosa600,
-                    titulo = ultimoGasto.titulo,
-                    detalle = "Alimentación • Ayer, 6:15 PM",
-                    monto = ultimoGasto.monto,
-                    colorMonto = Rosa600,
-                    colorDetalle = Slate500
-                )
+                if (uiState.movimientosRecientes.isEmpty()) {
+                    Text("Aún no hay movimientos", fontSize = 12.sp, color = Slate500)
+                }
+                uiState.movimientosRecientes.forEach { movimiento ->
+                    val categoria = uiState.categorias.firstOrNull { it.id == movimiento.categoriaId }
+                    val estilo = estiloCategoria(movimiento.categoriaId)
+                    val esIngreso = movimiento.tipo == TipoMovimiento.INGRESO
+                    FilaMovimiento(
+                        icono = estilo.icono,
+                        fondoIcono = estilo.fondoIcono,
+                        colorIcono = if (esIngreso) TealOscuro else estilo.color,
+                        titulo = movimiento.descripcion,
+                        detalle = detalleMovimiento(movimiento, categoria?.nombre ?: "Sin categoría"),
+                        monto = movimiento.montoConSigno,
+                        colorMonto = if (esIngreso) Esmeralda600 else Rosa600,
+                        colorDetalle = if (esIngreso) Esmeralda700 else Slate500,
+                        fondoDetalle = if (esIngreso) Esmeralda50 else Color.Transparent
+                    )
+                }
             }
         }
+    }
+
+    tipoDialogo?.let { tipo ->
+        DialogoMovimiento(
+            tipo = tipo,
+            categorias = uiState.categorias.filter { it.tipo == tipo },
+            onCerrar = { tipoDialogo = null },
+            onGuardar = { descripcion, monto, categoriaId ->
+                val guardado = viewModel.agregarMovimiento(
+                    descripcion = descripcion,
+                    monto = monto,
+                    tipo = tipo,
+                    categoriaId = categoriaId
+                )
+                if (guardado) tipoDialogo = null
+                guardado
+            }
+        )
     }
 }
 
@@ -240,7 +283,7 @@ private fun BarraDashboard() {
 }
 
 @Composable
-private fun TarjetaSaldo(saldo: Long, ingresos: Long, gastos: Long) {
+private fun TarjetaSaldo(saldo: Long, saldoInicial: Long, ingresos: Long, gastos: Long) {
     var saldoVisible by rememberSaveable { mutableStateOf(true) }
 
     Column(
@@ -287,6 +330,12 @@ private fun TarjetaSaldo(saldo: Long, ingresos: Long, gastos: Long) {
             ResumenMovimiento(Modifier.weight(1f), "Ingresos", ingresos, Icons.Outlined.ArrowDownward, Esmeralda400, saldoVisible)
             ResumenMovimiento(Modifier.weight(1f), "Gastos", gastos, Icons.Outlined.ArrowUpward, Rosa400, saldoVisible)
         }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Saldo inicial: ${if (saldoVisible) formatoCop(saldoInicial) else "$ ••••"} COP",
+            fontSize = 10.sp,
+            color = AguaClaro.copy(alpha = 0.8f)
+        )
     }
 }
 
@@ -315,7 +364,11 @@ private fun ResumenMovimiento(
 }
 
 @Composable
-private fun GastosPorCategoria(onCategoriaClick: (Int) -> Unit) {
+private fun GastosPorCategoria(
+    gastos: List<GastoCategoria>,
+    totalGastos: Long,
+    onCategoriaClick: (Int) -> Unit
+) {
     Tarjeta(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -325,7 +378,7 @@ private fun GastosPorCategoria(onCategoriaClick: (Int) -> Unit) {
             )
             Spacer(Modifier.width(8.dp))
             Text("Gastos por Categoría", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800, modifier = Modifier.weight(1f))
-            Text("${formatoCop(totalGastosEjemplo)} COP", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TealOscuro)
+            Text("${formatoCop(totalGastos)} COP", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TealOscuro)
         }
 
         // Barra de distribución porcentual
@@ -336,20 +389,23 @@ private fun GastosPorCategoria(onCategoriaClick: (Int) -> Unit) {
                 .clip(RoundedCornerShape(50))
                 .background(Slate100)
         ) {
-            categoriasEjemplo.forEach { categoria ->
+            gastos.filter { it.total > 0L }.forEach { gasto ->
+                val estilo = estiloCategoria(gasto.categoria.id)
                 Box(
                     Modifier
-                        .weight(categoria.gastado.toFloat())
+                        .weight(gasto.total.toFloat())
                         .fillMaxHeight()
-                        .background(categoria.color)
+                        .background(estilo.color)
                 )
             }
         }
 
-        categoriasEjemplo.chunked(2).forEach { fila ->
+        gastos.chunked(2).forEach { fila ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                fila.forEach { categoria ->
-                    val porcentaje = categoria.gastado * 100f / totalGastosEjemplo
+                fila.forEach { gasto ->
+                    val categoria = gasto.categoria
+                    val estilo = estiloCategoria(categoria.id)
+                    val porcentaje = if (totalGastos == 0L) 0f else gasto.total * 100f / totalGastos
                     Row(
                         modifier = Modifier
                             .weight(1f)
@@ -359,7 +415,7 @@ private fun GastosPorCategoria(onCategoriaClick: (Int) -> Unit) {
                             .padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(categoria.icono, null, tint = categoria.color, modifier = Modifier.size(20.dp))
+                        Icon(estilo.icono, null, tint = estilo.color, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(8.dp))
                         Column {
                             Text(
@@ -368,13 +424,72 @@ private fun GastosPorCategoria(onCategoriaClick: (Int) -> Unit) {
                                 fontWeight = FontWeight.Medium,
                                 color = Slate500
                             )
-                            Text(formatoCop(categoria.gastado), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800)
+                            Text(formatoCop(gasto.total), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800)
                         }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun DialogoMovimiento(
+    tipo: TipoMovimiento,
+    categorias: List<Categoria>,
+    onCerrar: () -> Unit,
+    onGuardar: (String, Long, Int) -> Boolean
+) {
+    var descripcion by rememberSaveable(tipo) { mutableStateOf("") }
+    var montoTexto by rememberSaveable(tipo) { mutableStateOf("") }
+    var categoriaId by rememberSaveable(tipo) { mutableIntStateOf(categorias.firstOrNull()?.id ?: 0) }
+    var mostrarError by rememberSaveable(tipo) { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onCerrar,
+        title = { Text(if (tipo == TipoMovimiento.INGRESO) "Agregar ingreso" else "Registrar gasto") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = descripcion,
+                    onValueChange = { descripcion = it; mostrarError = false },
+                    label = { Text("Descripción") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = montoTexto,
+                    onValueChange = { valor ->
+                        montoTexto = valor.filter(Char::isDigit).take(11)
+                        mostrarError = false
+                    },
+                    label = { Text("Monto en COP") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+                categorias.forEach { categoria ->
+                    FilterChip(
+                        selected = categoria.id == categoriaId,
+                        onClick = { categoriaId = categoria.id },
+                        label = { Text(categoria.nombre) }
+                    )
+                }
+                if (mostrarError) {
+                    Text("Completa una descripción, un monto positivo y una categoría válida.", color = Rosa700, fontSize = 11.sp)
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                val monto = montoTexto.toLongOrNull()
+                mostrarError = monto == null || !onGuardar(descripcion, monto, categoriaId)
+            }) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCerrar) { Text("Cancelar") }
+        }
+    )
 }
 
 @Composable
@@ -434,7 +549,13 @@ private fun BarraNavegacionInferior(onDestino: (String) -> Unit) {
 @Preview(showBackground = true, heightDp = 1100)
 @Composable
 private fun DashboardScreenPreview() {
+    val previewViewModel: DashboardViewModel = viewModel(
+        factory = DashboardViewModel.factory(InMemoryFinanzasRepository())
+    )
     Proyectointegradormovilesg7Theme {
-        DashboardScreen(onCategoriaClick = {})
+        DashboardScreen(
+            viewModel = previewViewModel,
+            onCategoriaClick = {}
+        )
     }
 }

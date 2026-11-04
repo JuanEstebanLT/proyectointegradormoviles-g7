@@ -1,32 +1,26 @@
 package com.example.proyecto_integrador_moviles_g7.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.proyecto_integrador_moviles_g7.data.repository.FinanzasRepository
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
-class SaldoInicialViewModel : ViewModel() {
+class SaldoInicialViewModel(
+    private val repository: FinanzasRepository
+) : ViewModel() {
 
-    // Saldo inicial modificable
-    private val _saldoInicial = MutableStateFlow(0.0)
+    val saldoInicial: StateFlow<Long> = repository.state
+        .map { it.saldoInicial }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, repository.state.value.saldoInicial)
 
-    // Saldo observable desde la interfaz
-    val saldoInicial: StateFlow<Double> =
-        _saldoInicial.asStateFlow()
+    fun establecerSaldo(monto: Long): Boolean = repository.establecerSaldoInicial(monto)
 
-    // Establecer el saldo inicial
-    fun establecerSaldo(monto: Double) {
-        if (monto >= 0) {
-            _saldoInicial.value = monto
-        }
-    }
-
-    // Actualizar el saldo sin permitir valores negativos
-    fun actualizarSaldo(monto: Double) {
-        val nuevoSaldo = _saldoInicial.value + monto
-
-        if (nuevoSaldo >= 0) {
-            _saldoInicial.value = nuevoSaldo
-        }
+    companion object {
+        fun factory(repository: FinanzasRepository): ViewModelProvider.Factory =
+            simpleViewModelFactory { SaldoInicialViewModel(repository) }
     }
 }

@@ -31,6 +31,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,9 +46,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyecto_integrador_moviles_g7.data.repository.InMemoryFinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraSuperior
 import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
 import com.example.proyecto_integrador_moviles_g7.presentation.components.formatoCop
+import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.SaldoInicialViewModel
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar700
@@ -70,10 +75,16 @@ private const val MONTO_MAXIMO = 99_999_999_999L
 
 @Composable
 fun SaldoInicialScreen(
+    viewModel: SaldoInicialViewModel,
     onAtras: () -> Unit,
-    onGuardar: (saldoInicial: Long) -> Unit
+    onGuardado: () -> Unit
 ) {
+    val saldoGuardado by viewModel.saldoInicial.collectAsStateWithLifecycle()
     var monto by rememberSaveable { mutableLongStateOf(0L) }
+
+    LaunchedEffect(saldoGuardado) {
+        if (saldoGuardado > 0L && monto == 0L) monto = saldoGuardado
+    }
 
     fun fijarMonto(nuevo: Long) {
         monto = nuevo.coerceIn(0L, MONTO_MAXIMO)
@@ -194,7 +205,9 @@ fun SaldoInicialScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = { onGuardar(monto) },
+                onClick = {
+                    if (viewModel.establecerSaldo(monto)) onGuardado()
+                },
                 enabled = monto > 0,
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -297,7 +310,14 @@ private fun TeclaNumerica(modifier: Modifier, onClick: () -> Unit, contenido: @C
 @Preview(showBackground = true, heightDp = 900)
 @Composable
 private fun SaldoInicialScreenPreview() {
+    val previewViewModel: SaldoInicialViewModel = viewModel(
+        factory = SaldoInicialViewModel.factory(InMemoryFinanzasRepository())
+    )
     Proyectointegradormovilesg7Theme {
-        SaldoInicialScreen(onAtras = {}, onGuardar = {})
+        SaldoInicialScreen(
+            viewModel = previewViewModel,
+            onAtras = {},
+            onGuardado = {}
+        )
     }
 }
