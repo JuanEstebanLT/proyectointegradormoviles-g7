@@ -28,6 +28,31 @@ class InMemoryFinanzasRepositoryTest {
     private val dispatcher = StandardTestDispatcher()
     private lateinit var repository: InMemoryFinanzasRepository
 
+    @Test
+    fun `historial completo conserva movimientos fuera del resumen reciente`() {
+        repeat(7) { indice ->
+            assertTrue(repository.agregarMovimiento("Ingreso $indice", 100L, TipoMovimiento.INGRESO, 3))
+        }
+        val estado = DashboardViewModel.crearUiState(repository.state.value)
+        assertEquals(7, estado.movimientos.size)
+        assertEquals(5, estado.movimientosRecientes.size)
+        assertEquals(700L, estado.totalIngresos)
+    }
+
+    @Test
+    fun `registro desde categoria actualiza historial y saldo compartidos`() = runTest(dispatcher) {
+        val detalle = DetalleCategoriaViewModel(2, repository)
+        assertTrue(detalle.agregarMovimiento("Mercado", 40_000L))
+        advanceUntilIdle()
+        val estado = DashboardViewModel.crearUiState(repository.state.value)
+        assertEquals(40_000L, detalle.uiState.value.gastoCategoria)
+        assertEquals(-40_000L, estado.saldoDisponible)
+        assertEquals(2, estado.movimientos.single().categoriaId)
+        assertTrue(detalle.eliminarMovimiento(estado.movimientos.single().id))
+        advanceUntilIdle()
+        assertEquals(0L, DashboardViewModel.crearUiState(repository.state.value).saldoDisponible)
+    }
+
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)

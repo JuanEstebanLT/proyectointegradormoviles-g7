@@ -25,6 +25,7 @@ data class DashboardUiState(
     val totalIngresos: Long = 0L,
     val totalGastos: Long = 0L,
     val movimientosRecientes: List<Movimiento> = emptyList(),
+    val movimientos: List<Movimiento> = emptyList(),
     val gastosPorCategoria: List<GastoCategoria> = emptyList(),
     val categorias: List<Categoria> = emptyList()
 )
@@ -83,6 +84,7 @@ class DashboardViewModel(
                 totalIngresos = ingresos,
                 totalGastos = gastos,
                 movimientosRecientes = state.movimientos.sortedByDescending { it.fecha }.take(5),
+                movimientos = state.movimientos.sortedByDescending { it.fecha },
                 gastosPorCategoria = gastosPorCategoria,
                 categorias = state.categorias
             )
