@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.proyecto_integrador_moviles_g7"
-        minSdk = 36
+        minSdk = 26
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"

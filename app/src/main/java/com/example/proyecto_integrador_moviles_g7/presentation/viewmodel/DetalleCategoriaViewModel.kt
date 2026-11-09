@@ -49,6 +49,12 @@ class DetalleCategoriaViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DetalleCategoriaUiState())
 
+    fun agregarMovimiento(descripcion: String, monto: Long): Boolean {
+        val categoria = repository.state.value.categorias.firstOrNull { it.id == categoriaId }
+            ?: return false
+        return repository.agregarMovimiento(descripcion, monto, categoria.tipo, categoriaId)
+    }
+
     fun eliminarMovimiento(id: String): Boolean = repository.eliminarMovimiento(id)
 
     companion object {

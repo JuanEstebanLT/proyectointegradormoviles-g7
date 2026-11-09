@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -90,6 +91,7 @@ fun DetalleCategoriaScreen(
     viewModel: DetalleCategoriaViewModel,
     onAtras: () -> Unit
 ) {
+    var registrar by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pendiente = { nombre: String ->
@@ -107,6 +109,13 @@ fun DetalleCategoriaScreen(
             )
         }
         return
+    }
+    if (registrar) {
+        DialogoMovimiento(categoria.tipo, listOf(categoria),
+            onCerrar = { registrar = false },
+            onGuardar = { descripcion, monto, _ ->
+                viewModel.agregarMovimiento(descripcion, monto).also { if (it) registrar = false }
+            })
     }
     val movimientos = uiState.movimientos
     val estilo = estiloCategoria(categoria.id)
@@ -212,7 +221,7 @@ fun DetalleCategoriaScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                onClick = { pendiente("Registrar gasto") },
+                onClick = { registrar = true },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Turquesa, contentColor = TealOscuro)

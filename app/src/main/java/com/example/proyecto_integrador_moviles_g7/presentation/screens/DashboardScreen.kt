@@ -1,6 +1,5 @@
 package com.example.proyecto_integrador_moviles_g7.presentation.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +60,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -113,19 +111,19 @@ fun periodoActual(fecha: LocalDate = LocalDate.now()): String =
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
-    onCategoriaClick: (categoriaId: Int) -> Unit
+    onCategoriaClick: (categoriaId: Int) -> Unit,
+    onDestino: (String) -> Unit = {},
+    onPerfil: () -> Unit = {},
+    onNotificaciones: () -> Unit = {}
 ) {
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var tipoDialogo by rememberSaveable { mutableStateOf<TipoMovimiento?>(null) }
-    val pendiente = { nombre: String ->
-        Toast.makeText(context, "$nombre: pantalla pendiente de diseño", Toast.LENGTH_SHORT).show()
-    }
+
 
     Scaffold(
         containerColor = FondoClaro,
-        topBar = { BarraDashboard() },
-        bottomBar = { BarraNavegacionInferior(onDestino = pendiente) }
+        topBar = { BarraDashboard(onPerfil, onNotificaciones) },
+        bottomBar = { BarraNavegacionInferior(onDestino = onDestino) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -195,7 +193,7 @@ fun DashboardScreen(
                 onCategoriaClick = onCategoriaClick
             )
 
-            MetaAhorro(onClick = { pendiente("Ahorro") })
+            MetaAhorro(onClick = { onDestino("Ahorro") })
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -205,7 +203,7 @@ fun DashboardScreen(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = TealMedio,
-                        modifier = Modifier.clickable { pendiente("Movimientos") }
+                        modifier = Modifier.clickable { onDestino("Movimientos") }
                     )
                 }
                 if (uiState.movimientosRecientes.isEmpty()) {
@@ -251,7 +249,7 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun BarraDashboard() {
+private fun BarraDashboard(onPerfil: () -> Unit, onNotificaciones: () -> Unit) {
     Column(Modifier.background(Color.White)) {
         Row(
             modifier = Modifier
@@ -266,12 +264,13 @@ private fun BarraDashboard() {
                 Text("FINANZAS G7", fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = Slate400)
                 Text("Dashboard", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Slate800)
             }
-            IconButton(onClick = {}) {
+            IconButton(onClick = onNotificaciones) {
                 Icon(Icons.Outlined.Notifications, contentDescription = "Notificaciones", tint = Slate600)
             }
             Box(
                 modifier = Modifier
                     .size(32.dp)
+                    .clickable(onClick = onPerfil)
                     .background(TealOscuro, RoundedCornerShape(50)),
                 contentAlignment = Alignment.Center
             ) {
@@ -434,7 +433,7 @@ private fun GastosPorCategoria(
 }
 
 @Composable
-private fun DialogoMovimiento(
+internal fun DialogoMovimiento(
     tipo: TipoMovimiento,
     categorias: List<Categoria>,
     onCerrar: () -> Unit,
@@ -520,7 +519,7 @@ private fun MetaAhorro(onClick: () -> Unit) {
 }
 
 @Composable
-private fun BarraNavegacionInferior(onDestino: (String) -> Unit) {
+internal fun BarraNavegacionInferior(onDestino: (String) -> Unit, seleccionado: String = "Inicio") {
     val destinos = listOf(
         "Inicio" to Icons.Outlined.Home,
         "Movimientos" to Icons.Outlined.SwapHoriz,
@@ -530,10 +529,10 @@ private fun BarraNavegacionInferior(onDestino: (String) -> Unit) {
     NavigationBar(containerColor = Color.White) {
         destinos.forEachIndexed { indice, (nombre, icono) ->
             NavigationBarItem(
-                selected = indice == 0,
-                onClick = { if (indice != 0) onDestino(nombre) },
+                selected = nombre == seleccionado,
+                onClick = { onDestino(nombre) },
                 icon = { Icon(icono, contentDescription = nombre) },
-                label = { Text(nombre, fontSize = 10.sp, fontWeight = if (indice == 0) FontWeight.Bold else FontWeight.Medium) },
+                label = { Text(nombre, fontSize = 10.sp, fontWeight = if (nombre == seleccionado) FontWeight.Bold else FontWeight.Medium) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = TealOscuro,
                     selectedTextColor = TealOscuro,
