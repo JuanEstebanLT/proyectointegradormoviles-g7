@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
 import com.example.proyecto_integrador_moviles_g7.data.model.Movimiento
 import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
+import com.example.proyecto_integrador_moviles_g7.data.model.Usuario
+import com.example.proyecto_integrador_moviles_g7.data.network.SesionActual
+import com.example.proyecto_integrador_moviles_g7.data.repository.aModelo
 import com.example.proyecto_integrador_moviles_g7.data.repository.FinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.data.repository.FinanzasState
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,6 +58,10 @@ class DashboardViewModel(
     )
 
     fun eliminarMovimiento(id: String): Boolean = repository.eliminarMovimiento(id)
+
+    /** Usuario autenticado en la API, o null si no hay sesión. */
+    val usuario: Usuario?
+        get() = SesionActual.usuario?.aModelo()
 
     companion object {
         fun factory(repository: FinanzasRepository): ViewModelProvider.Factory =

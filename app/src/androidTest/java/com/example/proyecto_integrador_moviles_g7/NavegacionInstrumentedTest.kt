@@ -8,24 +8,22 @@ import com.example.proyecto_integrador_moviles_g7.ui.theme.Proyectointegradormov
 import org.junit.Rule
 import org.junit.Test
 
+/** Navegación que no requiere la API: Acceso <-> Registro y validación local del formulario. */
 class NavegacionInstrumentedTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
-    @Test fun recorreSeccionesYRegresaAlAcceso() {
+    @Test fun abreRegistroYRegresaAlAcceso() {
         compose.activity.setContent { Proyectointegradormovilesg7Theme { NavegacionApp() } }
-        compose.onNodeWithText("Entrar en modo demostración").performScrollTo().performClick()
-        compose.onNodeWithContentDescription("Movimientos", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Todos").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Informes", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Resumen de todos los movimientos de esta sesión").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Ahorro", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Orientación educativa").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Inicio", useUnmergedTree = true).performClick()
-        compose.onNodeWithContentDescription("Notificaciones", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("No hay notificaciones. El servicio de notificaciones aún no está implementado.").assertIsDisplayed()
-        compose.onNodeWithText("Volver").performClick()
-        compose.onNodeWithContentDescription("Perfil", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Volver al acceso").performClick()
-        compose.onNodeWithText("Entrar en modo demostración").assertExists()
+        compose.onNodeWithText("Iniciar sesión").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Regístrate").performScrollTo().performClick()
+        compose.onAllNodesWithText("Crear cuenta").onFirst().assertExists()
+        compose.onNodeWithContentDescription("Volver").performClick()
+        compose.onNodeWithText("Iniciar sesión").assertExists()
+    }
+
+    @Test fun validaCorreoAntesDeLlamarALaApi() {
+        compose.activity.setContent { Proyectointegradormovilesg7Theme { NavegacionApp() } }
+        compose.onNodeWithText("Iniciar sesión").performScrollTo().performClick()
+        compose.onNodeWithText("Ingresa un correo válido").assertExists()
     }
 }

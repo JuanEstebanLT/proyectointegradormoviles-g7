@@ -118,7 +118,7 @@ fun DetalleCategoriaScreen(
             })
     }
     val movimientos = uiState.movimientos
-    val estilo = estiloCategoria(categoria.id)
+    val estilo = estiloCategoria(categoria.nombre)
 
     Column(
         modifier = Modifier
@@ -239,7 +239,7 @@ fun DetalleCategoriaScreen(
 
 @Composable
 private fun TarjetaPresupuesto(categoria: Categoria, gastado: Long) {
-    val estilo = estiloCategoria(categoria.id)
+    val estilo = estiloCategoria(categoria.nombre)
     val avance = if (categoria.presupuesto == 0L) 0f else {
         (gastado.toFloat() / categoria.presupuesto).coerceIn(0f, 1f)
     }

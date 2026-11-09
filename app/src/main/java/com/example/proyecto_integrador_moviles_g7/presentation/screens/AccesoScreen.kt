@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.AlternateEmail
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Security
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,6 +47,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +80,8 @@ import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar900
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Crema
 import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Proyectointegradormovilesg7Theme
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa50
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa600
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate200
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate400
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate50
@@ -97,6 +102,10 @@ fun AccesoScreen(
     var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
     var mostrarContrasena by remember { mutableStateOf(false) }
+
+    LaunchedEffect(authState.usuario) {
+        if (authState.usuario != null) onIniciarSesion()
+    }
 
     Column(
         modifier = Modifier
@@ -120,7 +129,7 @@ fun AccesoScreen(
                     Spacer(Modifier.height(6.dp))
                     CampoTexto(
                         valor = correo,
-                        onCambio = { correo = it },
+                        onCambio = { correo = it; viewModel.limpiarError() },
                         icono = Icons.Outlined.AlternateEmail,
                         placeholder = "ejemplo@correo.com",
                         tipoTeclado = KeyboardType.Email
@@ -132,7 +141,7 @@ fun AccesoScreen(
                     Spacer(Modifier.height(6.dp))
                     CampoTexto(
                         valor = contrasena,
-                        onCambio = { contrasena = it },
+                        onCambio = { contrasena = it; viewModel.limpiarError() },
                         icono = Icons.Outlined.Lock,
                         placeholder = "••••••••",
                         tipoTeclado = KeyboardType.Password,
@@ -160,17 +169,19 @@ fun AccesoScreen(
                 }
 
                 Button(
-                    onClick = {
-                        viewModel.iniciarAccesoDemostracion()
-                        onIniciarSesion()
-                    },
+                    onClick = { viewModel.iniciarSesion(correo, contrasena) },
+                    enabled = !authState.cargando,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = TealOscuro)
                 ) {
-                    Text("Entrar en modo demostración", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.width(8.dp))
-                    Icon(Icons.AutoMirrored.Outlined.Login, null, modifier = Modifier.size(18.dp))
+                    if (authState.cargando) {
+                        CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
+                    } else {
+                        Text("Iniciar sesión", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.AutoMirrored.Outlined.Login, null, modifier = Modifier.size(18.dp))
+                    }
                 }
 
                 OutlinedButton(
@@ -188,25 +199,28 @@ fun AccesoScreen(
                     Text("Ingresar con huella digital", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 }
 
-                // El texto original mencionaba SHA-256 como cifrado; ver observación 7 del README
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Crema.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .background(
+                            if (authState.error != null) Rosa50 else Crema.copy(alpha = 0.5f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Outlined.Security, null, tint = Ambar700, modifier = Modifier.size(18.dp))
+                    Icon(
+                        if (authState.error != null) Icons.Outlined.ErrorOutline else Icons.Outlined.Security,
+                        null,
+                        tint = if (authState.error != null) Rosa600 else Ambar700,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        if (authState.esDemostracion) {
-                            "Demostración local: las credenciales no se validan y no se crea una sesión segura."
-                        } else {
-                            "Acceso local"
-                        },
+                        authState.error ?: "Tu sesión se valida con la Finanzas G7 API y tus datos quedan guardados en la nube.",
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
-                        color = Ambar900
+                        color = if (authState.error != null) Rosa600 else Ambar900
                     )
                 }
             }
@@ -297,7 +311,7 @@ private fun EncabezadoMarca() {
         Text("Bienvenido de nuevo", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(Modifier.height(4.dp))
         Text(
-            "Explora el prototipo con datos temporales almacenados en memoria",
+            "Inicia sesión para gestionar tus finanzas personales",
             fontSize = 12.sp,
             color = AguaClaro.copy(alpha = 0.8f),
             textAlign = TextAlign.Center,
@@ -307,7 +321,7 @@ private fun EncabezadoMarca() {
 }
 
 @Composable
-private fun CampoTexto(
+internal fun CampoTexto(
     valor: String,
     onCambio: (String) -> Unit,
     icono: ImageVector,
