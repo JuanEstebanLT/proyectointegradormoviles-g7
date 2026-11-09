@@ -1,0 +1,33 @@
+name: Finanzas G7 Backend API
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/*'
+      - 'fix/*'
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-api.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-api.yml'
+
+jobs:
+  pruebas-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependencias del backend
+        run: npm install --ignore-scripts --no-audit
+      - name: Verificar sintaxis
+        run: npm run check
+      - name: Ejecutar pruebas unitarias
+        run: npm test

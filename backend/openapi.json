@@ -1,0 +1,1320 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Finanzas G7 API",
+    "version": "1.0.0",
+    "description": "API REST propia de finanzas personales. Utiliza Supabase Auth, JWT y RLS. Importes expresados en COP enteros."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Desarrollo local; producción requiere HTTPS"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Estado del servidor",
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Registrar usuario con Supabase Auth",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 120
+                  },
+                  "correo": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "nombre",
+                  "correo",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Iniciar sesión",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "correo": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "correo",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Renovar tokens",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refresh_token": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "refresh_token"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Cerrar sesión",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Consultar identidad autenticada",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/usuarios/me": {
+      "get": {
+        "summary": "Consultar perfil financiero",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Cambiar nombre",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "nombre"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/usuarios/me/saldo-inicial": {
+      "put": {
+        "summary": "Configurar saldo inicial",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "monto": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99999999999
+                  }
+                },
+                "required": [
+                  "monto"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/usuarios/me/configuracion": {
+      "get": {
+        "summary": "Consultar preferencias",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar preferencias",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "meta_ahorro_mensual": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99999999999
+                  },
+                  "notificaciones_activas": {
+                    "type": "boolean"
+                  },
+                  "moneda_base": {
+                    "type": "string",
+                    "enum": [
+                      "COP"
+                    ]
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/categorias": {
+      "get": {
+        "summary": "Listar categorías del usuario",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear categoría",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "INGRESO",
+                      "GASTO"
+                    ]
+                  },
+                  "color_hex": {
+                    "type": "string",
+                    "pattern": "^#[A-Fa-f0-9]{6}$"
+                  },
+                  "presupuesto_mensual": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99999999999
+                  }
+                },
+                "required": [
+                  "nombre",
+                  "tipo"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/categorias/{id}": {
+      "get": {
+        "summary": "Consultar categoría",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "put": {
+        "summary": "Editar categoría",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "INGRESO",
+                      "GASTO"
+                    ]
+                  },
+                  "color_hex": {
+                    "type": "string"
+                  },
+                  "presupuesto_mensual": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99999999999
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar categoría sin movimientos",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/movimientos": {
+      "get": {
+        "summary": "Listar y filtrar movimientos",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "post": {
+        "summary": "Registrar ingreso o gasto",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "descripcion": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "INGRESO",
+                      "GASTO"
+                    ]
+                  },
+                  "monto": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 99999999999
+                  },
+                  "categoria_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "fecha_movimiento": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": [
+                  "tipo",
+                  "monto",
+                  "categoria_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/movimientos/{id}": {
+      "get": {
+        "summary": "Consultar movimiento",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "put": {
+        "summary": "Editar movimiento",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "descripcion": {
+                    "type": "string"
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "INGRESO",
+                      "GASTO"
+                    ]
+                  },
+                  "monto": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 99999999999
+                  },
+                  "categoria_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "fecha_movimiento": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar movimiento",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/resumen": {
+      "get": {
+        "summary": "Calcular resumen de saldo e ingresos/gastos por período",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    },
+    "/sugerencias": {
+      "get": {
+        "summary": "Consultar sugerencias educativas calculadas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta correcta"
+          },
+          "201": {
+            "description": "Recurso creado"
+          },
+          "202": {
+            "description": "Confirmación de correo necesaria"
+          },
+          "204": {
+            "description": "Operación completada sin contenido"
+          },
+          "400": {
+            "description": "Solicitud inválida"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Acceso denegado"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "409": {
+            "description": "Conflicto"
+          },
+          "429": {
+            "description": "Límite de solicitudes"
+          },
+          "500": {
+            "description": "Error interno"
+          }
+        }
+      }
+    }
+  }
+}
