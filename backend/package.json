@@ -1,0 +1,23 @@
+{
+  "name": "finanzas-g7-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API REST de Finanzas G7 sobre Supabase Auth y PostgreSQL",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/supabase.js && node --check src/finance.js && node --check src/validation.js"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "17.2.1",
+    "express": "5.1.0",
+    "express-rate-limit": "8.0.1",
+    "helmet": "8.1.0"
+  }
+}
