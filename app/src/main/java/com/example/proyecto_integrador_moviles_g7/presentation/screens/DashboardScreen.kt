@@ -211,7 +211,7 @@ fun DashboardScreen(
                 }
                 uiState.movimientosRecientes.forEach { movimiento ->
                     val categoria = uiState.categorias.firstOrNull { it.id == movimiento.categoriaId }
-                    val estilo = estiloCategoria(movimiento.categoriaId)
+                    val estilo = estiloCategoria(categoria?.nombre)
                     val esIngreso = movimiento.tipo == TipoMovimiento.INGRESO
                     FilaMovimiento(
                         icono = estilo.icono,
@@ -389,7 +389,7 @@ private fun GastosPorCategoria(
                 .background(Slate100)
         ) {
             gastos.filter { it.total > 0L }.forEach { gasto ->
-                val estilo = estiloCategoria(gasto.categoria.id)
+                val estilo = estiloCategoria(gasto.categoria.nombre)
                 Box(
                     Modifier
                         .weight(gasto.total.toFloat())
@@ -403,7 +403,7 @@ private fun GastosPorCategoria(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 fila.forEach { gasto ->
                     val categoria = gasto.categoria
-                    val estilo = estiloCategoria(categoria.id)
+                    val estilo = estiloCategoria(categoria.nombre)
                     val porcentaje = if (totalGastos == 0L) 0f else gasto.total * 100f / totalGastos
                     Row(
                         modifier = Modifier

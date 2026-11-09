@@ -84,9 +84,16 @@ fun SeccionesScreen(
                     Button(onClick = { onDestino("Informes") }) { Text("Consultar informes") }
                 }
                 "Perfil" -> {
-                    Text("Acceso de demostración local")
-                    Text("Los datos se conservan en memoria durante esta sesión. No hay una cuenta de Supabase conectada.")
-                    Button(onClick = onSalir) { Text("Volver al acceso") }
+                    val usuario = viewModel.usuario
+                    Text(usuario?.nombre ?: "Sin sesión", style = MaterialTheme.typography.titleLarge)
+                    usuario?.let {
+                        Text(it.correo)
+                        if (it.telefono.isNotBlank()) Text(it.telefono)
+                        Text(if (it.esAdmin) "Rol: Administrador" else "Rol: Usuario",
+                            style = MaterialTheme.typography.labelLarge)
+                    }
+                    Text("Tus datos se guardan en la Finanzas G7 API.")
+                    Button(onClick = onSalir) { Text("Cerrar sesión") }
                 }
                 "Notificaciones" -> Text("No hay notificaciones. El servicio de notificaciones aún no está implementado.")
             }

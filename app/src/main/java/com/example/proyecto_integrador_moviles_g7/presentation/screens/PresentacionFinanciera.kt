@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.DirectionsBus
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocalHospital
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.ui.graphics.Color
@@ -22,11 +23,13 @@ data class EstiloCategoria(
     val fondoIcono: Color
 )
 
-fun estiloCategoria(categoriaId: Int): EstiloCategoria = when (categoriaId) {
-    1 -> EstiloCategoria(Icons.Outlined.Home, TealOscuro, Color(0xFFECFEFF))
-    2 -> EstiloCategoria(Icons.Outlined.Restaurant, TealMedio, Color(0xFFEFF6FF))
-    3 -> EstiloCategoria(Icons.Outlined.DirectionsBus, Turquesa, Color(0xFFF0FDFA))
-    4 -> EstiloCategoria(Icons.Outlined.Movie, Ambar500, Color(0xFFFFF1F2))
+/** El estilo se elige por nombre: los ids de categoría los asigna la API y varían por usuario. */
+fun estiloCategoria(nombreCategoria: String?): EstiloCategoria = when (nombreCategoria?.lowercase()) {
+    "vivienda" -> EstiloCategoria(Icons.Outlined.Home, TealOscuro, Color(0xFFECFEFF))
+    "alimentación", "alimentacion" -> EstiloCategoria(Icons.Outlined.Restaurant, TealMedio, Color(0xFFEFF6FF))
+    "transporte" -> EstiloCategoria(Icons.Outlined.DirectionsBus, Turquesa, Color(0xFFF0FDFA))
+    "ocio" -> EstiloCategoria(Icons.Outlined.Movie, Ambar500, Color(0xFFFFF1F2))
+    "salud" -> EstiloCategoria(Icons.Outlined.LocalHospital, Ambar500, Color(0xFFFFF1F2))
     else -> EstiloCategoria(Icons.Outlined.AccountBalanceWallet, TealOscuro, Color(0xFFECFEFF))
 }
 
