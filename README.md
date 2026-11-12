@@ -8,23 +8,24 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-Lenguaje-7F52FF?style=flat-square&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Interfaz-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
 [![Gradle](https://img.shields.io/badge/Gradle-Build-02303A?style=flat-square&logo=gradle&logoColor=white)](https://gradle.org/)
-[![API propia](https://img.shields.io/badge/API-Propia%20REST-FF6F00?style=flat-square&logo=json&logoColor=white)](#api-propia-finanzas-g7-api)
+[![API propia](https://img.shields.io/badge/API-REST%20Express-FF6F00?style=flat-square&logo=json&logoColor=white)](#api-propia-finanzas-g7-api)
+[![MVVM](https://img.shields.io/badge/Arquitectura-MVVM-00897B?style=flat-square)](#arquitectura-y-consumo-de-la-api)
+[![Supabase](https://img.shields.io/badge/Base%20de%20datos-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](#api-propia-finanzas-g7-api)
 [![GitHub](https://img.shields.io/badge/GitHub-Repositorio-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7)
 
 </div>
 
 ---
 
+
 ## Descripción
 
-Proyecto Integrador Móviles G7 es una aplicación móvil Android planificada para apoyar el control manual de las finanzas personales. Permitirá registrar un saldo inicial, ingresos, gastos y categorías, y utilizar esa información para consultar el saldo disponible, revisar el historial financiero y analizar la distribución de los movimientos.
+**Finanzas G7** es una aplicación Android para llevar el control manual de las finanzas personales. Permite consultar el saldo, registrar ingresos y gastos, organizar movimientos por categorías y revisar el historial financiero desde una interfaz desarrollada con Jetpack Compose.
 
-El producto también contempla sugerencias educativas de ahorro obtenidas mediante reglas sencillas y explicables aplicadas exclusivamente a la información registrada por la persona usuaria.
+El proyecto integra una aplicación **Kotlin con arquitectura MVVM** y una **API REST propia** desarrollada con Node.js y Express, que utiliza PostgreSQL en Supabase. El código de la aplicación, la navegación y la integración HTTP se encuentran incorporados en la rama principal del repositorio.
 
-La aplicación consumirá una **API REST propia**, diseñada y desarrollada por el mismo equipo, que expone los recursos del dominio financiero. La aplicación móvil actúa como cliente de esa API.
-
-> [!IMPORTANT]
-> Las funcionalidades descritas en este documento corresponden al alcance planificado del MVP. La implementación, las pruebas de ejecución y la publicación de una versión estable continúan pendientes. La API propia se encuentra en fase de diseño: su modelo de datos está definido, pero no ha sido implementada ni desplegada.
+> [!NOTE]
+> **Actualización del 12 de noviembre de 2026.** La API y el esquema SQL oficiales corresponden al desarrollo de **Emmanuel Villa**, integrado mediante el [PR #49](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/49). No se utiliza la base de datos alternativa preparada anteriormente. El equipo informa que realizó las pruebas funcionales de su entorno; los resultados y evidencias deben conservarse en el proceso de QA. La publicación de un release estable en GitHub es una actividad independiente.
 
 ## Objetivo
 
@@ -54,34 +55,33 @@ Permitir que una persona lleve control manual de su dinero registrando saldo ini
 - [Colaboración](#colaboración)
 - [Enlaces del proyecto](#enlaces-del-proyecto)
 
-## Funcionalidades planificadas
 
-El MVP contempla las siguientes capacidades:
+## Funcionalidades del MVP
 
-- Registrar un saldo inicial como referencia financiera.
-- Registrar ingresos y actualizar el saldo disponible.
-- Registrar gastos y descontarlos del saldo.
-- Clasificar movimientos mediante categorías.
-- Consultar el saldo, los ingresos y los gastos acumulados.
-- Consultar y filtrar el historial de movimientos.
-- Visualizar informes de ingresos, gastos y categorías.
-- Recibir sugerencias educativas de ahorro basadas en los movimientos registrados.
-- Editar y eliminar movimientos, conservando la consistencia de los cálculos.
-- Sincronizar la información registrada con la API propia del proyecto.
+La aplicación y la API contemplan:
+
+- Registro de cuentas e inicio de sesión mediante la autenticación propia de la API.
+- Configuración del saldo inicial y consulta del saldo disponible.
+- Registro de ingresos y gastos asociados a una categoría.
+- Consulta de movimientos, filtrado por tipo y eliminación con confirmación.
+- Visualización de ingresos, gastos, categorías y resumen financiero.
+- Navegación entre Inicio, Movimientos, Informes, Ahorro, Perfil y Notificaciones.
+- Servicios de categorías, configuración, resumen, sugerencias y edición de movimientos disponibles en el backend.
+
+Algunas acciones siguen en evolución en la interfaz móvil, como la edición de movimientos, la modificación del presupuesto por categoría y el consumo directo de los endpoints de informes y sugerencias. La existencia del endpoint no implica que todas sus funciones ya estén conectadas desde Android.
 
 ## Alcance del MVP
 
-La primera versión funcional se enfoca en el registro manual y la consulta de información financiera personal dentro de la aplicación. El alcance comprende:
-
-| Área | Alcance planificado |
+| Área | Implementación |
 |---|---|
-| Registro financiero | Saldo inicial, ingresos y gastos |
-| Organización | Categorías para clasificar movimientos |
-| Consulta | Resumen financiero e historial |
-| Análisis | Totales, períodos y distribución de gastos por categoría |
-| Mantenimiento | Edición y eliminación de movimientos |
-| Educación financiera | Sugerencias de ahorro simples, comprensibles y no profesionales |
-| Integración | Consumo de la API REST propia del equipo |
+| Presentación | Pantallas Kotlin/Jetpack Compose basadas en prototipos de Google Stitch |
+| Arquitectura | MVVM; ViewModels, StateFlow y repositorio de sesión compartida |
+| Navegación | Navigation Compose con destinos para los principales módulos |
+| Comunicación | Retrofit, OkHttp, Moshi y DTO para la API propia |
+| Backend | API REST Express bajo `/api/v1` |
+| Datos | PostgreSQL en Supabase, mediante el esquema y las consultas de la API oficial |
+| Seguridad | Autenticación JWT propia; control de acceso en la API |
+| Calidad | Pruebas funcionales reportadas por el equipo y suite Android versionada; seguimiento mediante Issues y QA |
 
 ## Fuera del alcance
 
@@ -99,159 +99,134 @@ Las sugerencias de ahorro tendrán un propósito exclusivamente educativo y se b
 > [!NOTE]
 > La exclusión de servicios externos se mantiene. La API consumida por la aplicación es propia del equipo y forma parte del alcance del proyecto, no una integración de terceros.
 
+
 ## API propia: Finanzas G7 API
 
-La aplicación consumirá una API REST diseñada y desarrollada por el equipo, que expone el dominio financiero del producto. Esta decisión corresponde a la opción de *API propia* contemplada en la Fase 1 del proyecto integrador.
+El backend oficial fue desarrollado por **Emmanuel Villa** e integrado a `main` mediante el [PR #49](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/49). Su implementación se encuentra en [`api/`](api/), separada del módulo Android [`app/`](app/).
 
 ### Justificación
 
-El dominio de la aplicación es información **generada por la persona usuaria**: sus movimientos, sus categorías y su saldo. Ninguna API pública puede proveer ese dato. Desarrollar la API propia permite que el modelo expuesto coincida exactamente con las Historias de Usuario ya definidas, sin adaptar el producto a un contrato ajeno.
+La información financiera registrada pertenece a cada usuario. Una API propia permite administrar cuentas, categorías, movimientos y cálculos mediante un contrato REST, manteniendo separadas la presentación móvil, las reglas del servidor y el almacenamiento de datos.
 
-### Por qué el problema amerita una aplicación móvil
+### Información técnica
 
-1. **Momento de captura.** El movimiento se registra donde ocurre, no al final del día. El dispositivo móvil es el único que acompaña a la persona en ese momento.
-2. **Frecuencia de uso.** El control financiero personal exige interacciones cortas y repetidas, propias de un dispositivo siempre disponible.
-3. **Datos personales.** La información financiera es sensible y se consulta de forma individual, no compartida.
-4. **Consulta inmediata.** El saldo disponible debe poder verificarse antes de decidir un gasto.
-
-### Información base
-
-| Elemento | Valor |
+| Elemento | Implementación |
 |---|---|
-| Nombre | Finanzas G7 API |
-| Estilo | REST sobre HTTPS |
-| Formato de intercambio | JSON |
-| Versionado | Prefijo de ruta `/api/v1` |
-| URL base | `https://<host-de-despliegue>/api/v1` *(pendiente de despliegue)* |
-| Autenticación | Por definir en TT-01 |
+| Framework | Node.js y Express 5 |
+| Base de datos | PostgreSQL mediante Supabase |
+| Tablas del esquema oficial | `usuario`, `configuracion`, `categoria`, `movimiento`, `sugerencia` y `sugerencia_categoria` |
+| Identificadores del esquema oficial | `BIGINT` |
+| Autenticación | Contraseñas con hash bcrypt y tokens JWT emitidos por la API |
+| Validación | Zod |
+| Prefijo REST | `/api/v1` |
+| Formato | JSON |
+| Configuración privada | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `JWT_SECRET` en el servidor |
+| Ejecución local | `http://localhost:3000/api/v1`, según `api/README.md` |
 
-> [!WARNING]
-> La URL base es un marcador de posición. La API no ha sido desplegada. Debe sustituirse por el dominio real una vez el despliegue sea verificado.
+> [!IMPORTANT]
+> **Supabase se utiliza como base de datos PostgreSQL, no como proveedor de inicio de sesión en esta implementación.** El backend usa autenticación propia y accede a la base con una clave de servicio que nunca debe incluirse en Android ni en GitHub. La base de datos alternativa de fases anteriores no forma parte del contrato oficial.
 
-### Recursos expuestos
+### Recursos de la API
 
-La API expone cuatro recursos principales, correspondientes a las cuatro entidades del modelo de datos:
-
-| # | Recurso | Endpoint base | Métodos previstos | HU relacionadas |
-|---|---|---|---|---|
-| 1 | Usuario | `/api/v1/usuarios` | `GET`, `POST`, `PUT` | HU-01 |
-| 2 | Categoría | `/api/v1/categorias` | `GET`, `POST`, `PUT`, `DELETE` | HU-04 |
-| 3 | Movimiento | `/api/v1/movimientos` | `GET`, `POST`, `PUT`, `DELETE` | HU-02, HU-03, HU-06, HU-09 |
-| 4 | Sugerencia | `/api/v1/sugerencias` | `GET` | HU-08 |
-
-Recursos complementarios:
-
-| Recurso | Endpoint base | Métodos | Naturaleza |
-|---|---|---|---|
-| Configuración | `/api/v1/usuarios/{id}/configuracion` | `GET`, `PUT` | Subrecurso en relación 1:1 con Usuario |
-| Resumen | `/api/v1/resumen` | `GET` | Recurso derivado; no corresponde a una entidad persistida |
-
-El recurso **Resumen** expone totales calculados a partir de los movimientos registrados. No constituye una entidad del modelo y por tanto no se contabiliza entre los cuatro recursos exigidos.
-
-### Stack propuesto para la API
-
-> [!NOTE]
-> Las siguientes tecnologías constituyen una **propuesta sujeta a evaluación**, no una decisión aprobada. Su aprobación formal corresponde a la tarea técnica TT-01.
-
-| Componente | Propuesta | Motivo |
+| Recurso | Ruta base | Operaciones disponibles |
 |---|---|---|
-| Lenguaje y framework | Node.js con Express | Curva de aprendizaje baja y familiaridad previa del equipo |
-| Base de datos | MySQL | Modelo relacional coherente con el diagrama ER |
-| Despliegue | Servicio PaaS con plan gratuito | Requisito de accesibilidad pública de la Fase 1 |
+| Usuarios y sesiones | `/api/v1/usuarios` | Registro, inicio de sesión, consulta y actualización |
+| Configuración | `/api/v1/usuarios/{id}/configuracion` | Consultar y actualizar |
+| Categorías | `/api/v1/categorias` | Crear, listar, consultar, editar y eliminar |
+| Movimientos | `/api/v1/movimientos` | Crear, listar, consultar, editar y eliminar |
+| Resumen | `/api/v1/resumen` | Consultar totales y saldo disponible |
+| Sugerencias | `/api/v1/sugerencias` | Consultar orientaciones educativas |
+| Salud | `/api/v1/salud` | Comprobar que responde el servidor |
 
-### Seguridad
+La descripción completa de parámetros, respuestas, requisitos de configuración y pruebas manuales se encuentra en [`api/README.md`](api/README.md).
 
-Las credenciales de la API, cadenas de conexión y claves de despliegue no deben incluirse en el repositorio. En la aplicación Android, la URL base y cualquier token se gestionarán mediante `local.properties` y se expondrán a través de `BuildConfig`. El archivo `local.properties` permanece excluido por `.gitignore`.
+### Seguridad y administración de datos
+
+El backend utiliza JWT para identificar al usuario y verificar permisos, distingue los roles `USUARIO` y `ADMIN` y valida las entradas antes de ejecutar operaciones. Las tablas SQL del backend están configuradas con RLS habilitado, mientras que el cliente del servidor utiliza `service_role` y realiza comprobaciones explícitas de pertenencia en las consultas.
+
+La aplicación Android **no contiene claves de Supabase**: consume únicamente la API mediante Retrofit. La URL base de desarrollo se define en `local.properties`. Las credenciales privadas se mantienen fuera del repositorio y no deben adjuntarse a Issues, capturas ni Pull Requests.
+
 
 ## Modelo de datos (Diagrama ER)
 
-El siguiente diagrama representa las entidades principales, sus atributos clave y las cardinalidades entre ellas.
+El modelo siguiente representa el esquema definido en [`api/database/schema.sql`](api/database/schema.sql). Los identificadores SQL utilizados por este backend son numéricos (`BIGINT`), y las relaciones conservan la separación de información por usuario.
 
 ```mermaid
-%%{init: {'er': {'layoutDirection': 'LR', 'entityPadding': 15, 'minEntityWidth': 140}}}%%
 erDiagram
     USUARIO {
-        int id PK
+        bigint id PK
         string nombre
         string correo UK
+        string contrasena_hash
+        string rol
         decimal saldo_inicial
         datetime creado_en
         datetime actualizado_en
     }
-
     CONFIGURACION {
-        int id PK
-        int usuario_id FK
+        bigint id PK
+        bigint usuario_id FK
         string moneda_base
         decimal meta_ahorro_mensual
         boolean notificaciones_activas
-        datetime actualizado_en
     }
-
     CATEGORIA {
-        int id PK
-        int usuario_id FK
+        bigint id PK
+        bigint usuario_id FK
         string nombre
         string tipo
         string color_hex
         decimal presupuesto_mensual
         boolean es_predeterminada
-        datetime creado_en
     }
-
     MOVIMIENTO {
-        int id PK
-        int usuario_id FK
-        int categoria_id FK
+        bigint id PK
+        bigint usuario_id FK
+        bigint categoria_id FK
         string tipo
         decimal monto
         string descripcion
+        string medio_pago
         date fecha_movimiento
         datetime creado_en
-        datetime actualizado_en
     }
-
     SUGERENCIA {
-        int id PK
+        bigint id PK
         string titulo
         string mensaje
         string regla_asociada
         int prioridad
         boolean activa
-        datetime creado_en
+    }
+    SUGERENCIA_CATEGORIA {
+        bigint sugerencia_id PK,FK
+        bigint categoria_id PK,FK
     }
 
-    USUARIO   ||--|| CONFIGURACION : "1:1 posee"
-    USUARIO   ||--o{ CATEGORIA     : "1:N define"
-    USUARIO   ||--o{ MOVIMIENTO    : "1:N registra"
-    CATEGORIA ||--o{ MOVIMIENTO    : "1:N clasifica"
-    CATEGORIA }o--o{ SUGERENCIA    : "N:M activa"
+    USUARIO ||--|| CONFIGURACION : "configura"
+    USUARIO ||--o{ CATEGORIA : "organiza"
+    USUARIO ||--o{ MOVIMIENTO : "registra"
+    CATEGORIA ||--o{ MOVIMIENTO : "clasifica"
+    CATEGORIA ||--o{ SUGERENCIA_CATEGORIA : "se relaciona"
+    SUGERENCIA ||--o{ SUGERENCIA_CATEGORIA : "se aplica"
 ```
 
-### Cardinalidades
+### Reglas de integridad
 
-| Relación | Notación Mermaid | Tipo | Lectura |
-|---|---|---|---|
-| Usuario — Configuración | `\|\|--\|\|` | **1:1** | Cada usuario posee exactamente una configuración |
-| Usuario — Categoría | `\|\|--o{` | **1:N** | Un usuario define cero o muchas categorías |
-| Usuario — Movimiento | `\|\|--o{` | **1:N** | Un usuario registra cero o muchos movimientos |
-| Categoría — Movimiento | `\|\|--o{` | **1:N** | Una categoría clasifica cero o muchos movimientos |
-| Categoría — Sugerencia | `}o--o{` | **N:M** | Una categoría puede activar varias sugerencias y una sugerencia puede aplicarse a varias categorías |
+- Cada movimiento pertenece a un usuario y a una categoría.
+- El tipo `INGRESO` o `GASTO` del movimiento debe coincidir con el de la categoría.
+- La tabla `sugerencia_categoria` representa la asociación N:M entre categorías y sugerencias.
+- Los importes se almacenan en columnas `NUMERIC` y las fechas de movimientos en columnas `DATE`.
+- El disparador de inicialización crea configuración y categorías predeterminadas para los nuevos usuarios.
 
-### Nota de implementación
+La fuente de referencia para la estructura física es el script SQL del backend, no las propuestas históricas del README.
 
-La relación **N:M** entre `CATEGORIA` y `SUGERENCIA` se resuelve en la base de datos mediante una tabla intermedia `sugerencia_categoria`, con las claves foráneas `categoria_id` y `sugerencia_id` conformando la clave primaria compuesta. Esta tabla no se representa como entidad en el diagrama porque no aporta atributos propios al modelo conceptual.
-
-El campo `tipo` en `CATEGORIA` y `MOVIMIENTO` admite los valores `INGRESO` y `GASTO`. La consistencia entre el tipo del movimiento y el de su categoría debe validarse en la capa de servicio de la API.
 
 ## Diseño de pantallas y flujo de navegación
 
-El prototipo de interfaz fue elaborado con **Google Stitch**.
+El diseño visual fue realizado en **Google Stitch** y trasladado a la capa `presentation/screens` de la aplicación Android.
 
-**Proyecto interactivo:** [Finanzas G7 — Prototipo en Google Stitch](https://stitch.withgoogle.com/preview/12478822216412901322?node-id=7d4f7b7b00ad42a0af3af3ec48ea438e)
-
-> [!NOTE]
-> Las tres pantallas requeridas por la Fase 3 se encuentran diseñadas. El prototipo incluye además tres pantallas complementarias de inicio y configuración inicial.
+**Prototipo de referencia:** [Finanzas G7 en Google Stitch](https://stitch.withgoogle.com/preview/12478822216412901322?node-id=7d4f7b7b00ad42a0af3af3ec48ea438e)
 
 ### Identidad visual
 
@@ -259,424 +234,226 @@ El prototipo de interfaz fue elaborado con **Google Stitch**.
 |---|---|
 | Nombre comercial | Finanzas G7 |
 | Eslogan | Control inteligente de tu dinero |
-| Color primario | Verde azulado oscuro (teal) |
+| Color primario | Verde azulado oscuro |
 | Color de acento | Turquesa |
-| Moneda | Peso colombiano (COP) |
-| Navegación principal | Barra inferior de cuatro destinos: Inicio, Movimientos, Informes, Ahorro |
+| Moneda | Pesos colombianos (COP) |
+| Navegación inferior | Inicio, Movimientos, Informes y Ahorro |
 
-### Pantallas requeridas
+### Pantallas principales
 
-#### Pantalla 1 — Dashboard (lista principal)
+#### Pantalla 1 — Dashboard
 
 ![Dashboard](imagenes/pantalla_1.png)
 
-| Aspecto | Descripción |
-|---|---|
-| Información que muestra | Saludo y período activo, saldo disponible con variación porcentual mensual, totales de ingresos y gastos, y la **lista de categorías de gasto**, cada una con su monto y su porcentaje de participación como indicador de estado. Incluye además una tarjeta de meta de ahorro |
-| Endpoints consumidos | `GET /api/v1/resumen` para saldo, ingresos y gastos totales; `GET /api/v1/categorias` para los nombres, colores e iconos de la lista; `GET /api/v1/usuarios/{id}/configuracion` para la meta de ahorro |
-| Acciones del usuario | Seleccionar una categoría de la lista, pulsar **Agregar Ingreso**, pulsar **Registrar Gasto**, abrir la meta de ahorro, alternar la visibilidad del saldo, navegar por la barra inferior |
-| Navega hacia | Pantalla 2 — Detalle de Categoría |
-| Dato que viaja | `categoria_id` de la categoría seleccionada |
-| HU relacionadas | HU-05, HU-07 |
+La pantalla inicial presenta el saldo disponible, el resumen de ingresos y gastos, los movimientos recientes y las categorías. Los datos observables provienen del `DashboardViewModel` y del repositorio financiero compartido. Permite iniciar el registro de movimientos y navegar al detalle de una categoría.
 
 #### Pantalla 2 — Detalle de Categoría
 
-![Detalle de Categoría](imagenes/pantalla_2.png)
+![Detalle de categoría](imagenes/pantalla_2.png)
 
-| Aspecto | Descripción |
-|---|---|
-| Información que muestra | Nombre de la categoría, consumo mensual acumulado, presupuesto asignado con barra de progreso y monto restante, indicadores de promedio por gasto, número de movimientos y participación sobre el total, selector de período y lista de transacciones de la categoría con fecha, hora y medio de pago |
-| Endpoints consumidos | `GET /api/v1/categorias/{id}` para los datos y el presupuesto de la categoría; `GET /api/v1/movimientos?categoria_id={id}&desde={fecha}&hasta={fecha}` para la lista de transacciones del período seleccionado |
-| Acciones del usuario | Cambiar el período, reordenar las transacciones por fecha, editar la categoría, registrar un gasto en la categoría, ajustar el presupuesto mensual, regresar |
-| Navega hacia | Formulario de registro de movimiento, o regreso a la Pantalla 1 |
-| Dato que viaja | `categoria_id` y `tipo = GASTO` hacia el formulario de registro |
-| HU relacionadas | HU-04, HU-06, HU-07 |
+Muestra datos de la categoría seleccionada, movimientos asociados, indicadores financieros y presupuesto. Recibe el identificador `categoriaId` mediante Navigation Compose. Algunas acciones de edición de categoría y ajuste de presupuesto aún conservan un comportamiento provisional.
 
 #### Pantalla 3 — Acceso
 
 ![Acceso](imagenes/pantalla_3.png)
 
-| Aspecto | Descripción |
+Presenta el inicio de sesión con correo y contraseña, enlazado a `POST /api/v1/usuarios/sesion`. Incluye acceso al registro de usuario. Las opciones de recuperación de contraseña, acceso biométrico y proveedor externo permanecen como controles no implementados.
+
+### Otras pantallas y módulos
+
+| Vista o módulo | Estado del código |
 |---|---|
-| Información que muestra | Encabezado de identidad de la aplicación, campos de correo electrónico y contraseña con alternancia de visibilidad, recuperación de contraseña, acceso biométrico, aviso de protección de datos y acceso alternativo mediante proveedor externo |
-| Endpoints consumidos | Endpoint de autenticación sobre el recurso `Usuario`, pendiente de definición en TT-01 |
-| Acciones del usuario | Introducir credenciales, iniciar sesión, usar acceso biométrico, recuperar contraseña, registrarse |
-| Navega hacia | Pantalla 1 — Dashboard |
-| Dato que viaja | Credenciales hacia la API; token de sesión y `usuario_id` de retorno |
-| HU relacionadas | Pendiente de formalizar |
+| Registro | `RegistroScreen.kt`; registro mediante la API |
+| Saldo Inicial | `SaldoInicialScreen.kt`; guarda mediante el repositorio financiero |
+| Movimientos | Sección disponible con historial, filtros básicos, registro y eliminación |
+| Informes | Sección disponible con cálculos sobre el estado financiero cargado |
+| Ahorro | Sección disponible con orientación educativa general |
+| Perfil | Visualización de información del usuario y cierre de sesión |
+| Notificaciones | Destino disponible; servicio de notificaciones pendiente |
+| Splash / Bienvenida | Parte del diseño conceptual; no son destinos independientes del `NavHost` actual |
 
-> [!WARNING]
-> La Fase 3 solicita que la tercera pantalla corresponda a **búsqueda o configuración**. La pantalla de Acceso cumple una función de autenticación, no de configuración. Se recomienda diseñar una pantalla de Configuración adicional para cubrir el requisito de forma literal.
-
-### Pantallas complementarias
-
-| Pantalla | Información que muestra | Endpoint consumido | Navega hacia |
-|---|---|---|---|
-| Splash | Logotipo, nombre, eslogan, distintivo de gestión en COP y versión | Ninguno | Bienvenida |
-| Bienvenida | Propuesta de valor y tres beneficios en carrusel, con valores ilustrativos | Ninguno | Saldo Inicial |
-| Saldo Inicial | Indicador de paso, campo de monto con validación, accesos rápidos y teclado numérico | `POST /api/v1/usuarios` con el `saldo_inicial`; `PUT /api/v1/usuarios/{id}` para ajustes posteriores | Dashboard |
-
-La pantalla de Saldo Inicial implementa la HU-01.
-
-### Flujo de navegación
+### Flujo de navegación implementado
 
 ```mermaid
 flowchart TD
-    SPLASH[Splash] -->|transición automática| BIENVENIDA[Bienvenida]
-    BIENVENIDA -->|Comenzar| SALDO[Saldo Inicial]
-    SALDO -->|"Guardar saldo<br/>saldo_inicial · usuario_id"| DASHBOARD["Dashboard<br/>PANTALLA 1"]
-    ACCESO["Acceso<br/>PANTALLA 3"] -->|"Iniciar sesión<br/>credenciales · token · usuario_id"| DASHBOARD
-    DASHBOARD -->|"seleccionar categoría<br/>categoria_id"| DETALLE["Detalle de Categoría<br/>PANTALLA 2"]
-    DETALLE -->|"registrar gasto<br/>categoria_id · tipo = GASTO"| REGISTRO["Registro de movimiento<br/>pendiente de diseño"]
+    A["Acceso"] -->|Iniciar sesión| D["Dashboard / Inicio"]
+    A -->|Crear cuenta| R["Registro"]
+    R -->|Cuenta registrada| S["Saldo Inicial"]
+    S -->|Continuar| D
+    D -->|Seleccionar categoría| C["Detalle de Categoría"]
+    C -->|Volver| D
+    D <--> M["Movimientos"]
+    D <--> I["Informes"]
+    D <--> H["Ahorro"]
+    D --> P["Perfil"]
+    D --> N["Notificaciones"]
+    P -->|Cerrar sesión| A
 ```
 
-### Pantallas pendientes de diseño
+Las rutas se encuentran en [`NavegacionApp.kt`](app/src/main/java/com/example/proyecto_integrador_moviles_g7/presentation/navigation/NavegacionApp.kt). El PR [#48](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/48) incorporó la navegación funcional.
 
-| Pantalla | Propósito | Endpoint previsto |
-|---|---|---|
-| Registro de movimiento | Formulario de captura de ingreso o gasto | `POST /api/v1/movimientos` |
-| Configuración | Ajustes de moneda base, meta de ahorro y notificaciones | `GET` y `PUT /api/v1/usuarios/{id}/configuracion` |
-| Movimientos | Historial completo de movimientos del usuario | `GET /api/v1/movimientos?usuario_id={id}` |
-| Informes | Análisis por período y comparativas | `GET /api/v1/resumen?desde={fecha}&hasta={fecha}` |
-| Ahorro | Seguimiento de metas y sugerencias educativas | `GET /api/v1/sugerencias` |
+### Aspectos pendientes en la interfaz
 
-### Capturas de pantalla
+El backend ofrece endpoints adicionales que todavía no están consumidos de forma independiente desde todas las pantallas móviles: edición completa de movimientos y categorías, consulta específica de `/resumen` y recuperación de `/sugerencias`. Su finalización y validación se controlan mediante las historias y tareas correspondientes en GitHub.
 
-Las capturas deben almacenarse en `imagenes/` dentro del repositorio y referenciarse con rutas relativas, no mediante enlaces temporales de la herramienta de diseño.
+Las imágenes `imagenes/pantalla_1.png`, `pantalla_2.png` y `pantalla_3.png` se conservan como referencias del diseño original; no deben interpretarse como capturas de ejecución de la versión actual.
 
-```text
-imagenes/pantalla_1.png
-imagenes/pantalla_2.png
-imagenes/pantalla_3.png
-imagenes/c1-splash.png
-imagenes/c2-bienvenida.png
-imagenes/c3-saldo-inicial.png
-```
-
-### Enlace al prototipo
-
-El proyecto interactivo completo, con las pantallas diseñadas y su flujo de navegación, está disponible públicamente en Google Stitch:
-
-https://stitch.withgoogle.com/preview/12478822216412901322?node-id=7d4f7b7b00ad42a0af3af3ec48ea438e
-
-### Observaciones de coherencia
-
-Durante la revisión del prototipo se identificaron las siguientes inconsistencias. Deben resolverse antes de iniciar la implementación:
-
-1. **Autenticación.** La pantalla de Bienvenida indica que no se requiere registro previo, mientras que la Pantalla 3 solicita credenciales. Debe definirse un único criterio de acceso.
-2. **Presupuesto por categoría.** ~~La Pantalla 2 muestra un presupuesto mensual asignado a la categoría. La entidad `CATEGORIA` no contempla ese atributo.~~ **Resuelto.** Se incorporó el atributo `presupuesto_mensual` de tipo `decimal` a la entidad `CATEGORIA` en el diagrama ER.
-3. **Medio de pago.** Las transacciones de la Pantalla 2 indican efectivo, tarjeta débito o transferencia. La entidad `MOVIMIENTO` no registra ese dato. Debe incorporarse como `medio_pago` o eliminarse del diseño.
-4. **Metas de ahorro.** El prototipo muestra metas con nombre propio y año. El modelo solo contempla `meta_ahorro_mensual` como atributo de `CONFIGURACION`, lo que no permite representarlas. Si se conservan, requieren una entidad `META` en relación 1:N con `USUARIO`.
-5. **Período mostrado.** El Dashboard y la Pantalla 2 exhiben un período que no corresponde a la fecha vigente del proyecto. Debe calcularse dinámicamente.
-6. **Encabezado de la Pantalla 2.** La barra superior conserva el título de la pantalla de Saldo Inicial. Debe mostrar el nombre de la categoría consultada.
-7. **Aviso de protección de datos.** El texto de la Pantalla 3 describe una función de resumen criptográfico como si fuera un mecanismo de cifrado. La afirmación debe corregirse o retirarse.
 
 ## Arquitectura y consumo de la API
 
-Esta sección define cómo se organizará el código de la aplicación y qué llamadas realizará sobre la Finanzas G7 API.
+La aplicación sigue **MVVM (Model–View–ViewModel)**. La interfaz se desarrolla con Jetpack Compose; los ViewModels exponen `StateFlow` y delegan la lectura y escritura de datos en una implementación del contrato `FinanzasRepository`. La sesión utiliza un repositorio compartido para mantener coherencia entre pantallas.
 
-### Patrón arquitectónico
-
-La aplicación adopta el patrón **MVVM** con separación en capas y flujo unidireccional de datos:
-
-`UI` → `ViewModel` → `Repository` → `Fuente de datos`
-
-| Capa | Responsabilidad | No debe |
-|---|---|---|
-| UI (Jetpack Compose) | Representar el estado recibido y notificar eventos del usuario | Realizar llamadas de red ni contener lógica de negocio |
-| ViewModel | Exponer el estado de la pantalla, coordinar casos de uso y sobrevivir a cambios de configuración | Conocer detalles de Retrofit ni referenciar componentes de Android UI |
-| Repository | Decidir el origen del dato, combinar fuente remota y caché local, mapear DTO a modelo de dominio | Exponer DTO hacia el ViewModel |
-| Fuente remota (Retrofit) | Ejecutar las llamadas HTTP y deserializar la respuesta | Contener reglas de negocio |
-| Fuente local (Room / DataStore) | Conservar la última información conocida y las preferencias del usuario | Ser la única fuente de verdad del saldo |
-
-### Diagrama de arquitectura
-
-El siguiente diagrama resume las capas previstas y el flujo de datos de la aplicación.
+### Arquitectura actual
 
 ```mermaid
 flowchart TD
-    subgraph UI["Capa UI · Jetpack Compose"]
-        A1[AccesoScreen]
-        A2[DashboardScreen]
-        A3[DetalleCategoriaScreen]
-        A4[SaldoInicialScreen]
-    end
-
-    subgraph VM["Capa ViewModel"]
-        B1[AccesoViewModel]
-        B2[DashboardViewModel]
-        B3[DetalleCategoriaViewModel]
-        B4[SaldoInicialViewModel]
-    end
-
-    subgraph ST["Estado de UI"]
-        S1["UiState.Loading"]
-        S2["UiState.Success"]
-        S3["UiState.Error"]
-    end
-
-    subgraph REPO["Capa Repository"]
-        C1[UsuarioRepository]
-        C2[CategoriaRepository]
-        C3[MovimientoRepository]
-        C4[ResumenRepository]
-    end
-
-    subgraph DS["Fuentes de datos"]
-        D1["RemoteDataSource · Retrofit"]
-        D2["LocalDataSource · Room"]
-        D3["PreferenciasDataSource · DataStore"]
-    end
-
-    subgraph NET["Capa de red"]
-        E1[FinanzasApiService]
-        E2["OkHttp · Interceptores"]
-        E3["Moshi · Serializacion"]
-    end
-
-    API[("Finanzas G7 API<br/>/api/v1")]
-
-    A1 --> B1
-    A2 --> B2
-    A3 --> B3
-    A4 --> B4
-
-    B1 --> S1
-    B2 --> S1
-    B3 --> S1
-    B4 --> S1
-    S1 --> S2
-    S1 --> S3
-
-    B1 --> C1
-    B2 --> C2
-    B2 --> C4
-    B3 --> C2
-    B3 --> C3
-    B4 --> C1
-
-    C1 --> D1
-    C2 --> D1
-    C3 --> D1
-    C4 --> D1
-    C1 --> D3
-    C2 --> D2
-    C3 --> D2
-
-    D1 --> E1
-    E1 --> E2
-    E1 --> E3
-    E2 --> API
-
-    API -. "JSON" .-> E3
-    E3 -. "DTO" .-> D1
-    D1 -. "Modelo de dominio" .-> C3
+    UI["Jetpack Compose / presentation/screens"] --> VM["ViewModels + StateFlow"]
+    VM --> REPO["FinanzasRepository"]
+    REPO --> APIREPO["ApiFinanzasRepository"]
+    UI --> AUTHVM["AuthViewModel"]
+    AUTHVM --> AUTHREPO["AuthRepository"]
+    APIREPO --> RETRO["Retrofit + OkHttp + Moshi"]
+    AUTHREPO --> RETRO
+    RETRO --> HTTP["Finanzas G7 API /api/v1"]
+    HTTP --> EXPRESS["Express · rutas, controladores y validaciones"]
+    EXPRESS --> SUPA[("PostgreSQL en Supabase")]
 ```
 
-### Decisiones técnicas de implementación
+### Componentes del repositorio
 
-| Aspecto | Decisión | Justificación |
+| Capa | Paquetes o archivos relevantes | Responsabilidad |
 |---|---|---|
-| Cliente HTTP | Retrofit sobre OkHttp | Estándar de facto en Android; integración directa con corrutinas |
-| Serialización | Moshi | Menor consumo de memoria que Gson y mejor soporte de Kotlin |
-| Asincronía | Kotlin Coroutines con funciones `suspend` sobre `Dispatchers.IO` | Evita bloquear el hilo principal sin gestión manual de hilos |
-| Estados de UI | Clase sellada `UiState` con variantes `Loading`, `Success` y `Error` | Obliga a tratar los tres escenarios en cada pantalla |
-| Caché local | Room | Permite consultar el historial sin conexión |
-| Preferencias | DataStore | Reemplazo recomendado de SharedPreferences |
-| Carga de imágenes | Coil | Biblioteca de carga asíncrona nativa para Compose |
-| Inyección de dependencias | Hilt | Reduce el acoplamiento entre capas |
+| Interfaz | `presentation/screens`, `presentation/components` | Vistas y eventos de usuario |
+| Navegación | `presentation/navigation/NavegacionApp.kt` | Destinos y transición entre pantallas |
+| ViewModel | `presentation/viewmodel` | Estado reactivo y coordinación de acciones |
+| Modelo | `data/model` | Objetos de dominio financiero |
+| Acceso a datos | `data/repository` | Abstracción del origen de información |
+| Red | `data/network` y `data/api` | Cliente Retrofit y sesión HTTP |
+| Transferencia | `data/dto` | Adaptación del contrato JSON |
+| Backend | `api/src/routes`, `controllers`, `schemas` | Endpoints, validaciones y lógica del servidor |
+| Base de datos | `api/database` | Esquema SQL, datos iniciales y migraciones |
 
-### Gestión de estados de UI
+### Integración Android–API
 
-Cada pantalla expone un único estado observable:
+La integración con el backend está implementada mediante `ClienteApi.kt` y `FinanzasApiService.kt`. Las operaciones que utiliza el cliente actualmente son:
 
-```text
-sealed interface UiState<out T> {
-    data object Loading : UiState<Nothing>
-    data class Success<T>(val datos: T) : UiState<T>
-    data class Error(val mensaje: String) : UiState<Nothing>
-}
-```
-
-| Estado | Comportamiento en la interfaz |
-|---|---|
-| `Loading` | Indicador de progreso o esqueleto de contenido |
-| `Success` | Renderizado del contenido con los datos recibidos |
-| `Error` | Mensaje comprensible y acción de reintento |
-
-Ninguna pantalla debe asumir que la respuesta llegará correctamente. El estado `Error` es obligatorio en las cuatro pantallas.
-
-### Seguridad de credenciales
-
-La URL base, las claves y los tokens no se incluyen en el control de versiones. Se declaran en `local.properties`, excluido por `.gitignore`, y se exponen mediante `BuildConfig`:
-
-```text
-# local.properties — archivo local, nunca versionado
-API_BASE_URL=https://<host-de-despliegue>/api/v1
-```
-
-El token de sesión se adjunta mediante un interceptor de OkHttp, no se escribe en cada llamada ni se registra en los logs de compilación de release.
-
-### Tabla de endpoints consumidos
-
-| # | Método | Endpoint | Pantalla que lo invoca | Propósito | HU |
-|---:|---|---|---|---|---|
-| 1 | `POST` | `/api/v1/usuarios/sesion` | Acceso | Autenticar al usuario y obtener el token de sesión | — |
-| 2 | `POST` | `/api/v1/usuarios` | Saldo Inicial | Crear el usuario con su `saldo_inicial` | HU-01 |
-| 3 | `GET` | `/api/v1/usuarios/{id}` | Dashboard | Recuperar los datos del usuario autenticado | HU-01 |
-| 4 | `PUT` | `/api/v1/usuarios/{id}` | Configuración | Ajustar el saldo inicial registrado | HU-01 |
-| 5 | `GET` | `/api/v1/usuarios/{id}/configuracion` | Dashboard, Configuración | Obtener moneda base y meta de ahorro | HU-01 |
-| 6 | `PUT` | `/api/v1/usuarios/{id}/configuracion` | Configuración | Actualizar preferencias del usuario | HU-01 |
-| 7 | `GET` | `/api/v1/categorias?usuario_id={id}` | Dashboard | Listar categorías con su participación en el gasto | HU-04 |
-| 8 | `GET` | `/api/v1/categorias/{id}` | Detalle de Categoría | Obtener datos y presupuesto de la categoría | HU-04 |
-| 9 | `POST` | `/api/v1/categorias` | Configuración | Crear una categoría personalizada | HU-04 |
-| 10 | `PUT` | `/api/v1/categorias/{id}` | Detalle de Categoría | Editar nombre, color o presupuesto | HU-04 |
-| 11 | `DELETE` | `/api/v1/categorias/{id}` | Configuración | Eliminar una categoría sin movimientos asociados | HU-04 |
-| 12 | `GET` | `/api/v1/movimientos?usuario_id={id}` | Movimientos | Listar el historial completo | HU-06 |
-| 13 | `GET` | `/api/v1/movimientos?categoria_id={id}&desde={fecha}&hasta={fecha}` | Detalle de Categoría | Filtrar transacciones por categoría y período | HU-06 |
-| 14 | `GET` | `/api/v1/movimientos/{id}` | Detalle de movimiento | Consultar un movimiento concreto | HU-06 |
-| 15 | `POST` | `/api/v1/movimientos` | Registro de movimiento | Registrar un ingreso o un gasto | HU-02, HU-03 |
-| 16 | `PUT` | `/api/v1/movimientos/{id}` | Detalle de movimiento | Editar un movimiento existente | HU-09 |
-| 17 | `DELETE` | `/api/v1/movimientos/{id}` | Detalle de movimiento | Eliminar un movimiento | HU-09 |
-| 18 | `GET` | `/api/v1/resumen?usuario_id={id}` | Dashboard | Obtener saldo disponible, ingresos y gastos totales | HU-05 |
-| 19 | `GET` | `/api/v1/resumen?desde={fecha}&hasta={fecha}` | Informes | Calcular totales por período | HU-07 |
-| 20 | `GET` | `/api/v1/sugerencias` | Ahorro | Recuperar las sugerencias educativas aplicables | HU-08 |
-
-### Estructura de paquetes prevista
-
-```text
-com.movilesg7.finanzas
-├── data
-│   ├── remote
-│   │   ├── api          FinanzasApiService
-│   │   ├── dto          Objetos de transferencia
-│   │   └── interceptor  Autenticacion y registro
-│   ├── local
-│   │   ├── dao          Acceso a Room
-│   │   └── entity       Entidades persistidas
-│   ├── mapper           Conversion DTO a dominio
-│   └── repository       Implementaciones de repositorio
-├── domain
-│   ├── model            Modelos de dominio
-│   └── repository       Contratos de repositorio
-├── ui
-│   ├── acceso
-│   ├── dashboard
-│   ├── detallecategoria
-│   ├── saldoinicial
-│   ├── navigation       Grafo de navegacion
-│   ├── theme            Color, tipografia y formas
-│   └── common           Componentes y estados compartidos
-└── di                   Modulos de inyeccion
-```
-
-### Códigos de respuesta previstos
-
-| Código | Situación | Tratamiento en la aplicación |
+| Método | Endpoint | Uso en Android |
 |---|---|---|
-| `200` | Consulta correcta | Transición a `UiState.Success` |
-| `201` | Recurso creado | Confirmación y actualización de la lista |
-| `400` | Datos inválidos | Mensaje de validación en el formulario |
-| `401` | Token ausente o expirado | Redirección a la pantalla de Acceso |
-| `404` | Recurso inexistente | Mensaje de recurso no encontrado |
-| `500` | Error del servidor | `UiState.Error` con acción de reintento |
-| Sin red | Ausencia de conectividad | Mostrar la última información almacenada en Room e indicar que está desactualizada |
+| `POST` | `/usuarios` | Crear cuenta |
+| `POST` | `/usuarios/sesion` | Iniciar sesión |
+| `GET` | `/usuarios/{id}` | Obtener datos de la cuenta |
+| `PUT` | `/usuarios/{id}` | Actualizar saldo inicial |
+| `GET` | `/categorias` | Cargar categorías |
+| `GET` | `/movimientos` | Cargar movimientos |
+| `POST` | `/movimientos` | Registrar ingreso o gasto |
+| `DELETE` | `/movimientos/{id}` | Eliminar movimiento |
+
+Todas estas rutas usan el prefijo `/api/v1`. El backend dispone de operaciones adicionales documentadas en [`api/README.md`](api/README.md).
+
+### Estado y almacenamiento
+
+`FinanzasSessionViewModel` mantiene `ApiFinanzasRepository` durante la sesión. El estado financiero observado se representa con `FinanzasState` y `StateFlow`. El repositorio en memoria se conserva para datos y pruebas locales, pero el flujo principal de la aplicación utiliza la implementación de API.
+
+La sesión de acceso (`SesionActual`) conserva el JWT en memoria. Esto significa que al finalizar el proceso de la aplicación se debe volver a iniciar sesión. No está implementado un almacenamiento local persistente con Room ni DataStore.
+
+La API gestiona las escrituras remotas y las pantallas se actualizan desde el estado compartido. La carga de movimientos tiene un límite de registros por solicitud; la paginación y el uso de resúmenes del servidor son puntos a considerar cuando aumente el volumen de información.
+
+### Configuración de comunicación
+
+En desarrollo Android, la dirección de la API se define en `local.properties`, ignorado por Git:
+
+```properties
+API_BASE_URL=http://10.0.2.2:3000/api/v1
+```
+
+La IP `10.0.2.2` permite que el emulador Android acceda al servidor ejecutado en el equipo local. Para un dispositivo físico se utiliza la IP alcanzable del equipo servidor. En producción debe configurarse una URL HTTPS válida.
+
+Las claves privadas de Supabase y la firma de JWT se configuran únicamente en el entorno del backend. No deben introducirse en el código de la aplicación Android.
+
 
 ## Tecnologías
 
-Las tecnologías confirmadas actualmente son:
-
-| Tecnología | Uso previsto |
+| Tecnología | Uso actual |
 |---|---|
-| Android Studio | Entorno de desarrollo |
-| Kotlin | Lenguaje principal |
-| Gradle | Construcción y gestión del proyecto |
-| Jetpack Compose | Desarrollo de la interfaz Android |
-| Git | Control de versiones |
-| GitHub | Repositorio, Issues, Pull Requests y gestión del proyecto |
-| API REST propia | Exposición del dominio financiero al cliente móvil |
-| MVVM | Patrón arquitectónico de la aplicación |
-| Retrofit y OkHttp | Cliente HTTP para el consumo de la API |
-| Moshi | Serialización y deserialización de JSON |
-| Kotlin Coroutines | Ejecución asíncrona de las llamadas de red |
-| Room | Caché local del historial financiero |
-| DataStore | Preferencias del usuario |
-| Hilt | Inyección de dependencias |
-| Coil | Carga asíncrona de imágenes |
+| Android Studio | Desarrollo y ejecución del cliente móvil |
+| Kotlin | Código de la aplicación |
+| Jetpack Compose y Material 3 | Construcción de interfaces |
+| Navigation Compose | Navegación entre destinos |
+| MVVM y StateFlow | Separación de responsabilidades y estado observable |
+| Kotlin Coroutines | Operaciones asíncronas |
+| Retrofit, OkHttp y Moshi | Consumo HTTP y serialización JSON |
+| Gradle | Construcción y pruebas Android |
+| Node.js y Express 5 | API REST del equipo |
+| Zod | Validación del backend |
+| PostgreSQL y Supabase | Persistencia de datos del backend |
+| bcryptjs y jsonwebtoken | Autenticación propia de la API |
+| Git y GitHub | Versionado, colaboración, Pull Requests e Issues |
+| Google Stitch | Diseño inicial de la interfaz |
 
-> [!NOTE]
-> El patrón arquitectónico y las bibliotecas de consumo quedan definidos en la sección [Arquitectura y consumo de la API](#arquitectura-y-consumo-de-la-api), correspondiente a la planificación técnica. Su formalización se registra en la tarea TT-01. El stack de implementación de la API propia permanece como propuesta sujeta a evaluación.
+No se utilizan Room, DataStore, Hilt ni Coil como componentes implementados del cliente actual.
 
 ## Estado actual del proyecto
 
+**Corte de seguimiento: 12 de noviembre de 2026.**
+
 | Elemento | Estado |
 |---|---|
-| Repositorio | ✅ Configurado |
-| Protección de `main` | ✅ Configurada |
-| Equipo | ✅ Vinculado |
-| GitHub Project | ✅ Configurado |
-| Historias de Usuario | ✅ Definidas |
-| Tareas Técnicas | ✅ Definidas |
-| Trazabilidad HU ↔ TT | ✅ Configurada |
-| Documentación inicial | ✅ Creada |
-| Selección de la API | ✅ Definida (API propia) |
-| Modelo de datos de la API | ✅ Diseñado |
-| Prototipo de interfaz | ✅ Diseñado |
-| Arquitectura de la aplicación | ✅ Planificada |
-| Endpoints documentados | ✅ Definidos |
-| Formalización de TT-01 | ⏳ Pendiente |
-| Persistencia definitiva | ⏳ Pendiente |
-| Implementación de la API | ⏳ Pendiente |
-| Despliegue de la API | ⏳ Pendiente |
-| Implementación de la app | ⏳ Pendiente |
-| Pruebas de ejecución | ⏳ Pendiente |
-| Release MVP | ⏳ Pendiente |
+| Repositorio y control de versiones | Configurado |
+| Protección de `main` mediante reglas de GitHub | Activa |
+| Equipo, tablero e historias de usuario | Organizados en GitHub |
+| Vistas de Jetpack Compose | Incorporadas en `main` (PR #40) |
+| Estructura MVVM | Incorporada (PR #38) |
+| ViewModels y estado compartido | Integrados (PR #42 y PR #44) |
+| Navegación de pantallas | Incorporada (PR #48) |
+| API REST y capa HTTP Android | Integradas en el repositorio (PR #49) |
+| Modelo SQL de la API oficial | Disponible en `api/database` |
+| Pruebas funcionales del entorno del equipo | Realizadas, según validación del equipo |
+| Evidencias de QA y cierre de Issues | En seguimiento |
+| Publicación de un release estable en GitHub | Pendiente |
+
+> [!NOTE]
+> El equipo confirmó la ejecución satisfactoria de pruebas funcionales. Este README registra el estado reportado y los componentes que constan en el repositorio; no sustituye el informe de QA ni la evidencia de un despliegue público.
+
 
 ## Historias de Usuario
 
-El backlog funcional inicial está compuesto por nueve Historias de Usuario:
+Las nueve historias funcionales del MVP permanecen registradas en GitHub para mantener trazabilidad de desarrollo, pruebas y criterios de aceptación.
 
-| ID | Issue | Historia | Estado inicial |
-|---|---:|---|---|
-| HU-01 | [#8](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/8) | Registrar saldo inicial | Backlog |
-| HU-02 | [#10](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/10) | Registrar ingresos | Backlog |
-| HU-03 | [#6](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/6) | Registrar gastos | Backlog |
-| HU-04 | [#5](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/5) | Clasificar movimientos por categorías | Backlog |
-| HU-05 | [#1](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/1) | Consultar saldo y resumen financiero | Backlog |
-| HU-06 | [#9](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/9) | Consultar historial de movimientos | Backlog |
-| HU-07 | [#7](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/7) | Visualizar informes de ingresos y gastos | Backlog |
-| HU-08 | [#3](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/3) | Recibir sugerencias de ahorro | Backlog |
-| HU-09 | [#11](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/11) | Editar y eliminar movimientos financieros | Backlog |
-
-Estas historias están relacionadas con 14 Tareas Técnicas. La tarea documental DOC-01 es adicional y no altera el conteo funcional del MVP.
-
-### Actividades derivadas de la API propia
-
-La incorporación de la API propia genera actividades adicionales que deben formalizarse como Issues antes de iniciar su desarrollo:
-
-| ID propuesto | Actividad | Estado |
+| ID | Issue | Historia |
 |---|---|---|
-| HU-10 | Sincronizar movimientos con la API propia | Pendiente de creación |
-| TT-15 | Diseñar e implementar la Finanzas G7 API | Pendiente de creación |
-| TT-16 | Desplegar y verificar la accesibilidad de la API | Pendiente de creación |
-| TT-17 | Implementar la capa de consumo HTTP en la aplicación | Pendiente de creación |
+| HU-01 | [#8](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/8) | Registrar saldo inicial |
+| HU-02 | [#10](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/10) | Registrar ingresos |
+| HU-03 | [#6](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/6) | Registrar gastos |
+| HU-04 | [#5](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/5) | Clasificar movimientos por categorías |
+| HU-05 | [#1](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/1) | Consultar saldo y resumen financiero |
+| HU-06 | [#9](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/9) | Consultar historial |
+| HU-07 | [#7](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/7) | Visualizar informes |
+| HU-08 | [#3](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/3) | Recibir sugerencias de ahorro |
+| HU-09 | [#11](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/11) | Editar y eliminar movimientos |
 
-> [!IMPORTANT]
-> Los identificadores anteriores son una propuesta. No deben considerarse creados hasta que existan los Issues correspondientes en GitHub y estén vinculados al milestone del MVP.
+### Integraciones y tareas técnicas recientes
+
+| Trabajo | Referencia | Resultado |
+|---|---|---|
+| Estructura MVVM | [#37](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/37) / [PR #38](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/38) | Integrado |
+| Vistas basadas en Stitch | [#39](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/39) / [PR #40](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/40) | Integrado |
+| ViewModels y StateFlow | [#41](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/41) / [PR #42](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/42) | Integrado |
+| Sincronización MVVM | [#43](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/43) / [PR #44](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/44) | Integrado |
+| Navegación | [#47](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/47) / [PR #48](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/48) | Integrado |
+| API REST oficial | [#45](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/issues/45) / [PR #49](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/49) | Integrado |
+
+El [PR #46](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/pull/46) corresponde a una implementación alternativa de backend que fue cerrada sin fusionarse y **no** forma parte de la versión oficial.
+
 
 ## Gestión del proyecto
 
-La planificación se administra mediante [Proyecto Integrador Móviles G7 — Project #6](https://github.com/users/JuanEstebanLT/projects/6), asociado al milestone **MVP v1.0 - Control financiero personal**.
+La planificación se administra en [Proyecto Integrador Móviles G7 — GitHub Project #6](https://github.com/users/JuanEstebanLT/projects/6), con el milestone [MVP v1.0 - Control financiero personal](https://github.com/JuanEstebanLT/proyectointegradormoviles-g7/milestone/1).
 
-| Elemento de planificación | Cantidad |
-|---|---:|
-| Historias de Usuario | 9 |
-| Tareas Técnicas | 14 |
-| Elementos del backlog funcional | 23 |
+El backlog inicial se organizó en **9 historias de usuario y 14 tareas técnicas**; posteriormente se crearon Issues específicos para arquitectura, pantallas, navegación e implementación de la API. Los Issues se conservan para documentar tanto el trabajo incorporado como las verificaciones o mejoras pendientes.
 
-El tablero utiliza los siguientes estados:
+Los estados del tablero son: `Backlog` → `Ready` → `In Progress` → `In Review` → `QA` → `Done`.
 
-`Backlog` → `Ready` → `In Progress` → `In Review` → `QA` → `Done`
+La revisión de resultados, el seguimiento del MVP y la aprobación de cambios se coordinan desde GitHub.
 
 ## Flujo de trabajo
 
@@ -706,31 +483,28 @@ Done
 
 No se debe desarrollar directamente sobre `main`. Cada Pull Request debe estar vinculado a su Issue, presentar un alcance acotado y superar revisión y QA antes de integrarse.
 
+
 ## Equipo
 
-| Integrante | Rol |
+| Integrante | Responsabilidad |
 |---|---|
-| Juan Esteban Lezcano Tejada | Líder de Desarrollo y QA |
-| Emmanuel Villa | Desarrollador |
-| Juan Bastidas | Desarrollador |
-| Mariana Suarez Higuita | Desarrolladora |
+| **Juan Esteban Lezcano Tejada** | Líder de desarrollo y aseguramiento de calidad (QA) |
+| **Emmanuel Villa** | Desarrollo de API REST e integración del backend |
+| **Juan Bastidas** | Desarrollo Android y navegación |
+| **Mariana Suarez Higuita** | Estructura MVVM, ViewModels y estado de la aplicación |
 
 ## Estrategia de ramas
 
-El repositorio mantiene `main` como línea principal protegida y cuenta con las siguientes ramas personales:
-
-- `dev/juan-esteban-lezcano`
-- `dev/emmanuel-villa`
-- `dev/juan-bastidas`
-- `dev/mariana-suarez`
-
-Para trabajos concretos se deben crear ramas específicas desde la base acordada y relacionarlas con el número del Issue:
+`main` es la rama oficial y se encuentra protegida. El desarrollo se realiza en ramas temporales asociadas a una tarea o corrección y se incorpora mediante Pull Request.
 
 ```text
-feature/14-saldo-inicial
-docs/<issue>-readme-profesional
+feat/<issue>-descripcion
 fix/<issue>-descripcion
+docs/<issue>-descripcion
+test/<issue>-descripcion
 ```
+
+Las ramas personales y las ramas temporales de trabajos terminados no son necesarias para el flujo actual. Se deben eliminar cuando sus aportes hayan sido integrados o descartados, sin perder la trazabilidad de los Pull Requests.
 
 ## Convención de commits
 
@@ -759,7 +533,7 @@ feat(finanzas): implementar registro de saldo inicial (#14)
 
 ## Estructura documental
 
-El proyecto cuenta con documentación formal organizada fuera del código fuente en las siguientes áreas:
+La documentación de apoyo se organiza por áreas de trabajo. La siguiente clasificación describe el esquema documental del equipo y **no** representa carpetas existentes dentro de este repositorio:
 
 ```text
 00_Gobierno_Documental
@@ -777,52 +551,56 @@ Esta documentación reúne gobierno documental, planeación, requisitos, propues
 
 El diagrama entidad-relación de la API propia corresponde al área `03_Diseño`.
 
+
 ## Requisitos de desarrollo
 
-Para trabajar con el proyecto se requiere:
-
-- Git.
-- Android Studio.
-- Android SDK configurado.
-- JDK compatible con la configuración Gradle del repositorio.
-- Acceso autorizado al repositorio para publicar ramas y crear Pull Requests.
-- Acceso a la URL de la API propia una vez sea desplegada.
+- Git y Android Studio.
+- Android SDK y JDK compatibles con el Gradle Wrapper del proyecto.
+- Node.js 20 o superior para el backend.
+- Acceso al entorno de base de datos autorizado para ejecutar la API, sin publicar sus credenciales.
+- Dirección de red de la API accesible desde el emulador o el dispositivo.
 
 ## Instalación y clonación
 
-1. Clonar el repositorio:
+Clonar el proyecto:
 
-   ```powershell
-   git clone https://github.com/JuanEstebanLT/proyectointegradormoviles-g7.git
-   ```
-
-2. Acceder al directorio del proyecto:
-
-   ```powershell
-   cd proyectointegradormoviles-g7
-   ```
-
-3. Abrir el proyecto desde Android Studio.
-
-4. Permitir que Gradle sincronice la configuración existente.
-
-5. Registrar la URL base de la API en `local.properties`:
-
-   ```properties
-   API_BASE_URL=https://<host-de-despliegue>/api/v1
-   ```
-
-   Este archivo está excluido del control de versiones y no debe publicarse.
-
-## Compilación básica
-
-En Windows, desde la raíz del repositorio:
-
-```powershell
-.\gradlew.bat build
+```bat
+git clone https://github.com/JuanEstebanLT/proyectointegradormoviles-g7.git
+cd proyectointegradormoviles-g7
 ```
 
-La disponibilidad de una compilación satisfactoria dependerá del entorno Android, el JDK y las versiones configuradas en el proyecto.
+### Iniciar el backend
+
+La API se encuentra en `api/`. Antes de ejecutarla se debe crear un archivo `api/.env` local con las variables `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `JWT_SECRET`, utilizando únicamente credenciales autorizadas. Ese archivo **no se publica**.
+
+```bat
+cd api
+npm install
+npm run dev
+```
+
+El endpoint de salud local es `http://localhost:3000/api/v1/salud`. La configuración completa de la base y los endpoints se documenta en [`api/README.md`](api/README.md).
+
+### Configurar Android
+
+Abrir el proyecto en Android Studio y permitir la sincronización de Gradle. En el archivo raíz `local.properties` agregar la dirección que corresponda al entorno de prueba. Para el emulador con la API ejecutándose en el mismo PC:
+
+```properties
+API_BASE_URL=http://10.0.2.2:3000/api/v1
+```
+
+Para un dispositivo físico, utilizar una IP local alcanzable. En un entorno publicado, usar HTTPS. `local.properties` queda excluido del control de versiones.
+
+### Compilación y pruebas
+
+En una nueva terminal, desde la raíz del repositorio:
+
+```bat
+gradlew.bat test
+gradlew.bat build
+```
+
+El módulo Android contiene pruebas unitarias e instrumentadas. Los resultados funcionales del servidor y de la integración con la base deben documentarse en las evidencias de QA correspondientes. Los comandos de construcción no sustituyen las pruebas en dispositivo.
 
 ## Colaboración
 
