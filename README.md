@@ -33,7 +33,7 @@ Permitir que una persona lleve control manual de su dinero registrando saldo ini
 
 ## Tabla de contenido
 
-- [Funcionalidades planificadas](#funcionalidades-planificadas)
+- [Funcionalidades del MVP](#funcionalidades-del-mvp)
 - [Alcance del MVP](#alcance-del-mvp)
 - [Fuera del alcance](#fuera-del-alcance)
 - [API propia: Finanzas G7 API](#api-propia-finanzas-g7-api)
@@ -51,7 +51,6 @@ Permitir que una persona lleve control manual de su dinero registrando saldo ini
 - [Estructura documental](#estructura-documental)
 - [Requisitos de desarrollo](#requisitos-de-desarrollo)
 - [Instalación y clonación](#instalación-y-clonación)
-- [Compilación básica](#compilación-básica)
 - [Colaboración](#colaboración)
 - [Enlaces del proyecto](#enlaces-del-proyecto)
 
