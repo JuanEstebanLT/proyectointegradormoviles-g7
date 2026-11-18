@@ -1,7 +1,10 @@
 package com.example.proyecto_integrador_moviles_g7.data.api
 
+import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarCategoriaDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarMovimientoDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarUsuarioDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.CategoriaDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.CrearCategoriaDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.CrearMovimientoDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.InicioSesionDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.MovimientoDto
@@ -35,11 +38,23 @@ interface FinanzasApiService {
     @GET("categorias")
     suspend fun listarCategorias(): List<CategoriaDto>
 
+    @POST("categorias")
+    suspend fun crearCategoria(@Body datos: CrearCategoriaDto): CategoriaDto
+
+    @PUT("categorias/{id}")
+    suspend fun actualizarCategoria(@Path("id") id: Long, @Body datos: ActualizarCategoriaDto): CategoriaDto
+
+    @DELETE("categorias/{id}")
+    suspend fun eliminarCategoria(@Path("id") id: Long): Response<Unit>
+
     @GET("movimientos")
     suspend fun listarMovimientos(@Query("limite") limite: Int = 500): List<MovimientoDto>
 
     @POST("movimientos")
     suspend fun crearMovimiento(@Body datos: CrearMovimientoDto): MovimientoDto
+
+    @PUT("movimientos/{id}")
+    suspend fun actualizarMovimiento(@Path("id") id: Long, @Body datos: ActualizarMovimientoDto): MovimientoDto
 
     @DELETE("movimientos/{id}")
     suspend fun eliminarMovimiento(@Path("id") id: Long): Response<Unit>

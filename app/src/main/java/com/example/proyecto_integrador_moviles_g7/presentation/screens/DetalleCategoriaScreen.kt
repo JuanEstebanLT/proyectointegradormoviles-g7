@@ -26,12 +26,15 @@ import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PieChart
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -58,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
+import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
 import com.example.proyecto_integrador_moviles_g7.data.repository.InMemoryFinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraSuperior
 import com.example.proyecto_integrador_moviles_g7.presentation.components.FilaMovimiento
@@ -70,6 +74,7 @@ import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar900
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Crema
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda300
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda400
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda600
 import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Proyectointegradormovilesg7Theme
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa400
@@ -92,11 +97,12 @@ fun DetalleCategoriaScreen(
     onAtras: () -> Unit
 ) {
     var registrar by rememberSaveable { mutableStateOf(false) }
+    var editarCategoria by rememberSaveable { mutableStateOf(false) }
+    var eliminarCategoria by rememberSaveable { mutableStateOf(false) }
+    var menuAbierto by rememberSaveable { mutableStateOf(false) }
+    var editandoId by rememberSaveable { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val pendiente = { nombre: String ->
-        Toast.makeText(context, "$nombre: pendiente de implementar", Toast.LENGTH_SHORT).show()
-    }
     val categoria = uiState.categoria
     if (categoria == null) {
         Column(Modifier.fillMaxSize().background(FondoClaro)) {
@@ -114,11 +120,44 @@ fun DetalleCategoriaScreen(
         DialogoMovimiento(categoria.tipo, listOf(categoria),
             onCerrar = { registrar = false },
             onGuardar = { descripcion, monto, _ ->
-                viewModel.agregarMovimiento(descripcion, monto).also { if (it) registrar = false }
+                viewModel.agregarMovimiento(descripcion, monto).also { if (it == null) registrar = false }
             })
+    }
+    editandoId?.let { id -> uiState.movimientos.firstOrNull { it.id == id } }?.let { movimiento ->
+        DialogoMovimiento(
+            tipo = movimiento.tipo,
+            categorias = listOf(categoria),
+            inicial = movimiento,
+            onCerrar = { editandoId = null },
+            onGuardar = { descripcion, monto, categoriaId ->
+                viewModel.actualizarMovimiento(movimiento.id, descripcion, monto, categoriaId)
+                    .also { if (it == null) editandoId = null }
+            }
+        )
+    }
+    if (editarCategoria) {
+        DialogoCategoria(
+            inicial = categoria,
+            onCerrar = { editarCategoria = false },
+            onGuardar = { nombre, _, presupuesto ->
+                viewModel.actualizarCategoria(nombre, presupuesto).also { if (it) editarCategoria = false }
+            }
+        )
+    }
+    if (eliminarCategoria) {
+        DialogoEliminarCategoria(
+            categoria = categoria,
+            tieneMovimientos = uiState.movimientos.isNotEmpty(),
+            onCerrar = { eliminarCategoria = false },
+            onConfirmar = {
+                eliminarCategoria = false
+                if (viewModel.eliminarCategoria()) onAtras()
+            }
+        )
     }
     val movimientos = uiState.movimientos
     val estilo = estiloCategoria(categoria.nombre)
+    val esGasto = categoria.tipo == TipoMovimiento.GASTO
 
     Column(
         modifier = Modifier
@@ -126,11 +165,23 @@ fun DetalleCategoriaScreen(
             .background(FondoClaro)
     ) {
         BarraSuperior(titulo = categoria.nombre, onAtras = onAtras) {
-            IconButton(onClick = { pendiente("Editar categoría") }) {
+            IconButton(onClick = { editarCategoria = true }) {
                 Icon(Icons.Outlined.Edit, contentDescription = "Editar categoría", tint = Slate600)
             }
-            IconButton(onClick = { pendiente("Más opciones") }) {
-                Icon(Icons.Outlined.MoreVert, contentDescription = "Más opciones", tint = Slate600)
+            Box {
+                IconButton(onClick = { menuAbierto = true }) {
+                    Icon(Icons.Outlined.MoreVert, contentDescription = "Más opciones", tint = Slate600)
+                }
+                DropdownMenu(expanded = menuAbierto, onDismissRequest = { menuAbierto = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Eliminar categoría", color = Rosa600) },
+                        leadingIcon = { Icon(Icons.Outlined.DeleteOutline, null, tint = Rosa600) },
+                        onClick = {
+                            menuAbierto = false
+                            eliminarCategoria = true
+                        }
+                    )
+                }
             }
         }
 
@@ -155,7 +206,7 @@ fun DetalleCategoriaScreen(
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     )
                 }
-                Text("Detalle de Categoría • Gastos", fontSize = 12.sp, color = Slate500, modifier = Modifier.padding(top = 2.dp))
+                Text("Detalle de Categoría • ${if (esGasto) "Gastos" else "Ingresos"}", fontSize = 12.sp, color = Slate500, modifier = Modifier.padding(top = 2.dp))
             }
 
             TarjetaPresupuesto(categoria, uiState.gastoCategoria)
@@ -207,8 +258,13 @@ fun DetalleCategoriaScreen(
                         titulo = movimiento.descripcion,
                         detalle = detalleMovimiento(movimiento, categoria.nombre),
                         monto = movimiento.montoConSigno,
-                        colorMonto = Rosa600,
-                        onEliminar = { viewModel.eliminarMovimiento(movimiento.id) }
+                        colorMonto = if (esGasto) Rosa600 else Esmeralda600,
+                        onEditar = { editandoId = movimiento.id },
+                        onEliminar = {
+                            viewModel.eliminarMovimiento(movimiento.id)?.let { mensaje ->
+                                Toast.makeText(context, mensaje, Toast.LENGTH_LONG).show()
+                            }
+                        }
                     )
                 }
             }
@@ -228,10 +284,16 @@ fun DetalleCategoriaScreen(
             ) {
                 Icon(Icons.Outlined.AddCircle, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Registrar gasto en ${categoria.nombre}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Registrar ${if (esGasto) "gasto" else "ingreso"} en ${categoria.nombre}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
-            TextButton(onClick = { pendiente("Ajustar presupuesto") }) {
-                Text("Ajustar presupuesto mensual", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TealMedio)
+            if (esGasto) {
+                TextButton(onClick = { editarCategoria = true }) {
+                    Text("Ajustar presupuesto mensual", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TealMedio)
+                }
             }
         }
     }

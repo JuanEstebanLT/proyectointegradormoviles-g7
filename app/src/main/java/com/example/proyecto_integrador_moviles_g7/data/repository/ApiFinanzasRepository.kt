@@ -1,8 +1,11 @@
 package com.example.proyecto_integrador_moviles_g7.data.repository
 
 import com.example.proyecto_integrador_moviles_g7.data.api.FinanzasApiService
+import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarCategoriaDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarMovimientoDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarUsuarioDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.CategoriaDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.CrearCategoriaDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.CrearMovimientoDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.MovimientoDto
 import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
@@ -71,7 +74,7 @@ class ApiFinanzasRepository(
 
     override fun establecerSaldoInicial(monto: Long): Boolean {
         val usuarioId = SesionActual.usuario?.id ?: return false
-        if (monto <= 0L) return false
+        if (monto <= 0L || !ReglasFinanzas.saldoInicialPermitido(_state.value, monto)) return false
 
         val anterior = _state.value.saldoInicial
         _state.update { it.copy(saldoInicial = monto) }
@@ -97,7 +100,8 @@ class ApiFinanzasRepository(
             medioPagoNormalizado.isEmpty() ||
             monto <= 0L ||
             categoria == null ||
-            categoria.tipo != tipo
+            categoria.tipo != tipo ||
+            !ReglasFinanzas.altaPermitida(_state.value, tipo, monto)
         ) return false
 
         // Se muestra al instante con un id temporal y se reemplaza por el que asigne la API
@@ -134,6 +138,7 @@ class ApiFinanzasRepository(
         val movimiento = _state.value.movimientos.firstOrNull { it.id == id } ?: return false
         // Un movimiento con id temporal todavía no existe en la API
         val idRemoto = id.toLongOrNull() ?: return false
+        if (!ReglasFinanzas.bajaPermitida(_state.value, movimiento)) return false
 
         quitarMovimiento(id)
         ejecutar(alFallar = { _state.update { it.copy(movimientos = it.movimientos + movimiento) } }) {
@@ -141,6 +146,100 @@ class ApiFinanzasRepository(
             if (!respuesta.isSuccessful && respuesta.code() != 404) throw HttpException(respuesta)
         }
         return true
+    }
+
+    override fun actualizarMovimiento(id: String, descripcion: String, monto: Long, categoriaId: Int): Boolean {
+        val state = _state.value
+        val anterior = state.movimientos.firstOrNull { it.id == id } ?: return false
+        // Un movimiento con id temporal todavía no existe en la API
+        val idRemoto = id.toLongOrNull() ?: return false
+        val descripcionNormalizada = descripcion.trim()
+        if (!ReglasFinanzas.edicionMovimientoValida(state, anterior, descripcionNormalizada, monto, categoriaId)) {
+            return false
+        }
+
+        reemplazarMovimiento(anterior.copy(descripcion = descripcionNormalizada, monto = monto, categoriaId = categoriaId))
+        ejecutar(alFallar = { reemplazarMovimiento(anterior) }) {
+            val actualizado = api.actualizarMovimiento(
+                idRemoto,
+                ActualizarMovimientoDto(
+                    categoriaId = categoriaId.toLong().takeIf { categoriaId != anterior.categoriaId },
+                    monto = monto.toDouble(),
+                    descripcion = descripcionNormalizada
+                )
+            ).aModelo()
+            reemplazarMovimiento(actualizado)
+        }
+        return true
+    }
+
+    override fun crearCategoria(nombre: String, tipo: TipoMovimiento, presupuesto: Long): Boolean {
+        val nombreNormalizado = nombre.trim()
+        if (!ReglasFinanzas.nombreCategoriaValido(_state.value, nombreNormalizado) || presupuesto < 0L) return false
+
+        // La categoría aparece cuando la API confirma su id (no hay ids temporales para categorías)
+        ejecutar(alFallar = {}) {
+            val creada = api.crearCategoria(
+                CrearCategoriaDto(nombreNormalizado, tipo.name, presupuesto.toDouble())
+            ).aModelo()
+            _state.update { estado ->
+                if (estado.categorias.any { it.id == creada.id }) estado
+                else estado.copy(categorias = estado.categorias + creada)
+            }
+        }
+        return true
+    }
+
+    override fun actualizarCategoria(id: Int, nombre: String, presupuesto: Long): Boolean {
+        val nombreNormalizado = nombre.trim()
+        val state = _state.value
+        val anterior = state.categorias.firstOrNull { it.id == id } ?: return false
+        if (!ReglasFinanzas.nombreCategoriaValido(state, nombreNormalizado, excluirId = id) || presupuesto < 0L) {
+            return false
+        }
+
+        reemplazarCategoria(anterior.copy(nombre = nombreNormalizado, presupuesto = presupuesto))
+        ejecutar(alFallar = { reemplazarCategoria(anterior) }) {
+            reemplazarCategoria(
+                api.actualizarCategoria(
+                    id.toLong(),
+                    ActualizarCategoriaDto(nombreNormalizado, presupuesto.toDouble())
+                ).aModelo()
+            )
+        }
+        return true
+    }
+
+    override fun eliminarCategoria(id: Int): Boolean {
+        val state = _state.value
+        val indice = state.categorias.indexOfFirst { it.id == id }
+        if (indice < 0 || ReglasFinanzas.tieneMovimientos(state, id)) return false
+        val categoria = state.categorias[indice]
+
+        _state.update { it.copy(categorias = it.categorias.filterNot { c -> c.id == id }) }
+        ejecutar(alFallar = {
+            _state.update { estado ->
+                val lista = estado.categorias.toMutableList()
+                lista.add(indice.coerceAtMost(lista.size), categoria)
+                estado.copy(categorias = lista)
+            }
+        }) {
+            val respuesta = api.eliminarCategoria(id.toLong())
+            if (!respuesta.isSuccessful && respuesta.code() != 404) throw HttpException(respuesta)
+        }
+        return true
+    }
+
+    private fun reemplazarMovimiento(movimiento: Movimiento) {
+        _state.update { estado ->
+            estado.copy(movimientos = estado.movimientos.map { if (it.id == movimiento.id) movimiento else it })
+        }
+    }
+
+    private fun reemplazarCategoria(categoria: Categoria) {
+        _state.update { estado ->
+            estado.copy(categorias = estado.categorias.map { if (it.id == categoria.id) categoria else it })
+        }
     }
 
     private fun quitarMovimiento(id: String) {

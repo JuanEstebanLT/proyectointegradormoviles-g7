@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDateTime
 
 data class DetalleCategoriaUiState(
     val categoria: Categoria? = null,
@@ -49,13 +50,27 @@ class DetalleCategoriaViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DetalleCategoriaUiState())
 
-    fun agregarMovimiento(descripcion: String, monto: Long): Boolean {
+    /** Devuelve null si se registró, o el mensaje que explica por qué no (por ejemplo, saldo insuficiente). */
+    fun agregarMovimiento(descripcion: String, monto: Long): String? {
         val categoria = repository.state.value.categorias.firstOrNull { it.id == categoriaId }
-            ?: return false
-        return repository.agregarMovimiento(descripcion, monto, categoria.tipo, categoriaId)
+            ?: return "La categoría ya no existe."
+        return OperacionesMovimiento.registrar(
+            repository, descripcion, monto, categoria.tipo, categoriaId, LocalDateTime.now(), "Efectivo"
+        )
     }
 
-    fun eliminarMovimiento(id: String): Boolean = repository.eliminarMovimiento(id)
+    /** Devuelve null si se guardó, o el motivo del rechazo. */
+    fun actualizarMovimiento(id: String, descripcion: String, monto: Long, categoriaId: Int): String? =
+        OperacionesMovimiento.editar(repository, id, descripcion, monto, categoriaId)
+
+    /** Devuelve null si se eliminó, o el motivo del rechazo. */
+    fun eliminarMovimiento(id: String): String? = OperacionesMovimiento.eliminar(repository, id)
+
+    fun actualizarCategoria(nombre: String, presupuesto: Long): Boolean =
+        repository.actualizarCategoria(categoriaId, nombre, presupuesto)
+
+    /** Solo se puede eliminar si la categoría no tiene movimientos. */
+    fun eliminarCategoria(): Boolean = repository.eliminarCategoria(categoriaId)
 
     companion object {
         fun factory(

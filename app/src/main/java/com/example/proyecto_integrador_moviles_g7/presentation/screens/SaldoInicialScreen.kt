@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -81,10 +82,13 @@ fun SaldoInicialScreen(
 ) {
     val saldoGuardado by viewModel.saldoInicial.collectAsStateWithLifecycle()
     var monto by rememberSaveable { mutableLongStateOf(0L) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(saldoGuardado) {
         if (saldoGuardado > 0L && monto == 0L) monto = saldoGuardado
     }
+    // Al cambiar el monto, el aviso anterior deja de aplicar
+    LaunchedEffect(monto) { error = null }
 
     fun fijarMonto(nuevo: Long) {
         monto = nuevo.coerceIn(0L, MONTO_MAXIMO)
@@ -204,9 +208,11 @@ fun SaldoInicialScreen(
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            error?.let { AvisoError(it) }
             Button(
                 onClick = {
-                    if (viewModel.establecerSaldo(monto)) onGuardado()
+                    error = viewModel.establecerSaldo(monto)
+                    if (error == null) onGuardado()
                 },
                 enabled = monto > 0,
                 modifier = Modifier.fillMaxWidth().height(54.dp),

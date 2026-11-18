@@ -1,5 +1,8 @@
 import { supabase } from '../config/supabase.js';
+import { verificarSaldo } from '../services/saldo.service.js';
 import { HttpError, obtenerUno, verificar } from '../utils/errores.js';
+
+const conSigno = (tipo, monto) => (tipo === 'GASTO' ? -Number(monto) : Number(monto));
 
 const COLUMNAS =
   'id, usuario_id, categoria_id, tipo, monto, descripcion, medio_pago, fecha_movimiento, creado_en, actualizado_en, ' +
@@ -55,6 +58,9 @@ export async function obtener(req, res) {
 export async function crear(req, res) {
   const datos = req.validado.body;
   datos.tipo = await resolverTipo(req.usuarioId, datos.categoria_id, datos.tipo);
+  if (datos.tipo === 'GASTO') {
+    await verificarSaldo(req.usuarioId, -datos.monto, 'Saldo insuficiente: no puedes gastar más de lo que tienes.');
+  }
 
   const movimiento = verificar(
     await supabase
@@ -72,11 +78,20 @@ export async function actualizar(req, res) {
   const cambios = req.validado.body;
 
   const actual = await obtenerUno(
-    supabase.from('movimiento').select('categoria_id').eq('id', id).eq('usuario_id', req.usuarioId),
+    supabase.from('movimiento').select('categoria_id, tipo, monto').eq('id', id).eq('usuario_id', req.usuarioId),
     'Movimiento'
   );
   if (cambios.categoria_id || cambios.tipo) {
     cambios.tipo = await resolverTipo(req.usuarioId, cambios.categoria_id ?? actual.categoria_id, cambios.tipo);
+  }
+  const variacion =
+    conSigno(cambios.tipo ?? actual.tipo, cambios.monto ?? actual.monto) - conSigno(actual.tipo, actual.monto);
+  if (variacion < 0) {
+    const mensaje =
+      (cambios.tipo ?? actual.tipo) === 'INGRESO'
+        ? 'No puedes reducir este ingreso: tu saldo quedaría en negativo.'
+        : 'Saldo insuficiente: con este cambio gastarías más de lo que tienes.';
+    await verificarSaldo(req.usuarioId, variacion, mensaje);
   }
 
   const movimiento = verificar(
@@ -93,6 +108,14 @@ export async function actualizar(req, res) {
 
 // DELETE /movimientos/:id   (HU-09)
 export async function eliminar(req, res) {
+  const actual = await obtenerUno(
+    supabase.from('movimiento').select('tipo, monto').eq('id', req.validado.params.id).eq('usuario_id', req.usuarioId),
+    'Movimiento'
+  );
+  if (actual.tipo === 'INGRESO') {
+    await verificarSaldo(req.usuarioId, -Number(actual.monto), 'No puedes eliminar este ingreso: tu saldo quedaría en negativo.');
+  }
+
   await obtenerUno(
     supabase.from('movimiento').delete().eq('id', req.validado.params.id).eq('usuario_id', req.usuarioId).select('id'),
     'Movimiento'

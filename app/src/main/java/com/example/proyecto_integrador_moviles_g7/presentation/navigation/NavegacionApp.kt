@@ -33,9 +33,10 @@ object Rutas {
     const val AHORRO = "ahorro"
     const val PERFIL = "perfil"
     const val NOTIFICACIONES = "notificaciones"
+    const val CATEGORIAS = "categorias"
 
     val secciones = mapOf("Inicio" to DASHBOARD, "Movimientos" to MOVIMIENTOS,
-        "Informes" to INFORMES, "Ahorro" to AHORRO)
+        "Informes" to INFORMES, "Ahorro" to AHORRO, "Categorías" to CATEGORIAS)
     const val ARG_CATEGORIA_ID = "categoriaId"
     const val DETALLE_CATEGORIA = "detalle_categoria/{$ARG_CATEGORIA_ID}"
 
@@ -126,7 +127,7 @@ fun NavegacionApp(navController: NavHostController = rememberNavController()) {
         mapOf(
             Rutas.MOVIMIENTOS to "Movimientos", Rutas.INFORMES to "Informes",
             Rutas.AHORRO to "Ahorro", Rutas.PERFIL to "Perfil",
-            Rutas.NOTIFICACIONES to "Notificaciones"
+            Rutas.NOTIFICACIONES to "Notificaciones", Rutas.CATEGORIAS to "Categorías"
         ).forEach { (ruta, titulo) ->
             composable(ruta) {
                 val dashboardViewModel: DashboardViewModel = viewModel(

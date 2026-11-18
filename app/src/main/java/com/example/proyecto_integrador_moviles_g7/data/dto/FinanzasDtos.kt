@@ -62,6 +62,25 @@ data class CrearMovimientoDto(
     @Json(name = "fecha_movimiento") val fechaMovimiento: String
 )
 
+/** PUT parcial: Moshi omite los campos null, así que solo se envía lo que cambia. */
+data class ActualizarMovimientoDto(
+    @Json(name = "categoria_id") val categoriaId: Long? = null,
+    val monto: Double? = null,
+    val descripcion: String? = null
+)
+
+data class CrearCategoriaDto(
+    val nombre: String,
+    val tipo: String,
+    @Json(name = "presupuesto_mensual") val presupuestoMensual: Double
+)
+
+/** El tipo de una categoría no se puede cambiar (la API lo rechaza). */
+data class ActualizarCategoriaDto(
+    val nombre: String,
+    @Json(name = "presupuesto_mensual") val presupuestoMensual: Double
+)
+
 data class ErrorDto(
     val error: String
 )
