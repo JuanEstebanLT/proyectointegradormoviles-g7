@@ -41,6 +41,7 @@ class DashboardViewModel(
         .map(::crearUiState)
         .stateIn(viewModelScope, SharingStarted.Eagerly, crearUiState(repository.state.value))
 
+    /** Devuelve null si se registró, o el mensaje que explica por qué no (por ejemplo, saldo insuficiente). */
     fun agregarMovimiento(
         descripcion: String,
         monto: Long,
@@ -48,16 +49,24 @@ class DashboardViewModel(
         categoriaId: Int,
         fecha: LocalDateTime = LocalDateTime.now(),
         medioPago: String = "Efectivo"
-    ): Boolean = repository.agregarMovimiento(
-        descripcion,
-        monto,
-        tipo,
-        categoriaId,
-        fecha,
-        medioPago
-    )
+    ): String? = OperacionesMovimiento.registrar(repository, descripcion, monto, tipo, categoriaId, fecha, medioPago)
 
-    fun eliminarMovimiento(id: String): Boolean = repository.eliminarMovimiento(id)
+    /** Devuelve null si se guardó, o el motivo del rechazo. */
+    fun actualizarMovimiento(id: String, descripcion: String, monto: Long, categoriaId: Int): String? =
+        OperacionesMovimiento.editar(repository, id, descripcion, monto, categoriaId)
+
+    /** Devuelve null si se eliminó, o el motivo del rechazo. */
+    fun eliminarMovimiento(id: String): String? = OperacionesMovimiento.eliminar(repository, id)
+
+    fun crearCategoria(nombre: String, tipo: TipoMovimiento, presupuesto: Long): Boolean =
+        repository.crearCategoria(nombre, tipo, presupuesto)
+
+    fun actualizarCategoria(id: Int, nombre: String, presupuesto: Long): Boolean =
+        repository.actualizarCategoria(id, nombre, presupuesto)
+
+    fun eliminarCategoria(id: Int): Boolean = repository.eliminarCategoria(id)
+
+    fun categoriaTieneMovimientos(id: Int): Boolean = repository.state.value.movimientos.any { it.categoriaId == id }
 
     /** Usuario autenticado en la API, o null si no hay sesión. */
     val usuario: Usuario?

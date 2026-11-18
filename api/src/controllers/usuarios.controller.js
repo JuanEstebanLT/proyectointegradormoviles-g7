@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { supabase } from '../config/supabase.js';
+import { verificarSaldo } from '../services/saldo.service.js';
 import { generarToken } from '../middlewares/autenticar.js';
 import { HttpError, obtenerUno, verificar } from '../utils/errores.js';
 
@@ -54,6 +55,19 @@ export async function obtener(req, res) {
 
 // PUT /usuarios/:id
 export async function actualizar(req, res) {
+  const nuevoSaldoInicial = req.validado.body.saldo_inicial;
+  if (nuevoSaldoInicial !== undefined) {
+    const actual = await obtenerUno(
+      supabase.from('usuario').select('saldo_inicial').eq('id', req.validado.params.id),
+      'Usuario'
+    );
+    await verificarSaldo(
+      req.validado.params.id,
+      nuevoSaldoInicial - Number(actual.saldo_inicial),
+      'No puedes bajar tanto el saldo inicial: tu saldo disponible quedaría en negativo.'
+    );
+  }
+
   const usuario = await obtenerUno(
     supabase.from('usuario').update(req.validado.body).eq('id', req.validado.params.id).select(COLUMNAS_USUARIO),
     'Usuario'

@@ -12,8 +12,8 @@ alter table usuario
 -- por un canal privado y debe cambiarse; aquí solo se guarda su hash bcrypt.
 -- Al insertarlas, el trigger crea su configuración y categorías predeterminadas.
 insert into usuario (nombre, correo, contrasena_hash, rol) values
-    ('Emmanuel Villa',        'emmanuel.villa@finanzasg7.com', '$2b$10$nMYejKZ8XdDkqYBZTczNOeN5.dj61X5tfTqk/gwkIXtq3LZ5F/lp2', 'ADMIN'),
-    ('Juan Esteban Lezcano',  'juan.lezcano@finanzasg7.com',   '$2b$10$cK.cyUAxGVm40pxb5IhvxOJfz46A5AEl9hNKmO0zf87OCIIWUE6hW', 'ADMIN'),
-    ('Mariana Suárez',        'mariana.suarez@finanzasg7.com', '$2b$10$Ap40eLa0QGd7o7iUemw4GuxU/qbSymhLHn.Ha5FyzNIrKSzmk.Wci', 'ADMIN'),
-    ('Juan David Bastidas',   'juan.bastidas@finanzasg7.com',  '$2b$10$3HJX8HvLuGbmD7vzqsWpvu4jQky4dKpBuMtHAdfIGj4InCT8V7SNO', 'ADMIN')
+    ('Emmanuel Villa',        'emmanuel.villa@finanzasg7.com', '$2b$10$og9941nSimVbz0w6u6d0w.MumHM6rgbJmJ4NfWmW1Jpc44RIpvdUi', 'ADMIN'),
+    ('Juan Esteban Lezcano',  'juan.lezcano@finanzasg7.com',   '$2b$10$YSqH.Ha3ZCGK7uUSZReojuWFsevco91.gUJ8H/do41XKg5pe9nsWq', 'ADMIN'),
+    ('Mariana Suárez',        'mariana.suarez@finanzasg7.com', '$2b$10$jmNwKEYPi/q1TtFO5MdMs.IZF0rwqywBML6AUz4UAiJ3eNE1nm/vu', 'ADMIN'),
+    ('Juan David Bastidas',   'juan.bastidas@finanzasg7.com',  '$2b$10$JBaIGNKd/UGxj3e60aJRkuXQFiYPzRFZyccCDMKW9njCjDIgZ6xce', 'ADMIN')
 on conflict (correo) do update set rol = 'ADMIN';

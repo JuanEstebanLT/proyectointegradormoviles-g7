@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -134,6 +135,7 @@ fun FilaMovimiento(
     modifier: Modifier = Modifier,
     colorDetalle: Color = Slate400,
     fondoDetalle: Color = Color.Transparent,
+    onEditar: (() -> Unit)? = null,
     onEliminar: (() -> Unit)? = null
 ) {
     Tarjeta(modifier = modifier.fillMaxWidth(), radio = 16.dp, relleno = PaddingValues(12.dp)) {
@@ -173,6 +175,16 @@ fun FilaMovimiento(
                 fontWeight = FontWeight.Bold,
                 color = colorMonto
             )
+            if (onEditar != null) {
+                IconButton(onClick = onEditar, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        Icons.Outlined.Edit,
+                        contentDescription = "Editar movimiento",
+                        tint = Slate400,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
             if (onEliminar != null) {
                 IconButton(onClick = onEliminar, modifier = Modifier.size(32.dp)) {
                     Icon(

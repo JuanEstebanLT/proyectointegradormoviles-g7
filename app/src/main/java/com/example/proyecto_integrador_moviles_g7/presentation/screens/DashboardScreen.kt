@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
@@ -68,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
+import com.example.proyecto_integrador_moviles_g7.data.model.Movimiento
 import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
 import com.example.proyecto_integrador_moviles_g7.data.repository.InMemoryFinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.presentation.components.FilaMovimiento
@@ -76,6 +78,7 @@ import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjet
 import com.example.proyecto_integrador_moviles_g7.presentation.components.formatoCop
 import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.DashboardViewModel
 import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.GastoCategoria
+import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.OperacionesMovimiento
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Crema
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda300
@@ -86,6 +89,7 @@ import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda700
 import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Proyectointegradormovilesg7Theme
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa400
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa600
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa700
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate100
@@ -118,7 +122,7 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var tipoDialogo by rememberSaveable { mutableStateOf<TipoMovimiento?>(null) }
-
+    var editandoId by rememberSaveable { mutableStateOf<String?>(null) }
 
     Scaffold(
         containerColor = FondoClaro,
@@ -190,7 +194,8 @@ fun DashboardScreen(
             GastosPorCategoria(
                 gastos = uiState.gastosPorCategoria,
                 totalGastos = uiState.totalGastos,
-                onCategoriaClick = onCategoriaClick
+                onCategoriaClick = onCategoriaClick,
+                onGestionar = { onDestino("Categorías") }
             )
 
             MetaAhorro(onClick = { onDestino("Ahorro") })
@@ -222,7 +227,8 @@ fun DashboardScreen(
                         monto = movimiento.montoConSigno,
                         colorMonto = if (esIngreso) Esmeralda600 else Rosa600,
                         colorDetalle = if (esIngreso) Esmeralda700 else Slate500,
-                        fondoDetalle = if (esIngreso) Esmeralda50 else Color.Transparent
+                        fondoDetalle = if (esIngreso) Esmeralda50 else Color.Transparent,
+                        onEditar = { editandoId = movimiento.id }
                     )
                 }
             }
@@ -235,14 +241,26 @@ fun DashboardScreen(
             categorias = uiState.categorias.filter { it.tipo == tipo },
             onCerrar = { tipoDialogo = null },
             onGuardar = { descripcion, monto, categoriaId ->
-                val guardado = viewModel.agregarMovimiento(
+                viewModel.agregarMovimiento(
                     descripcion = descripcion,
                     monto = monto,
                     tipo = tipo,
                     categoriaId = categoriaId
-                )
-                if (guardado) tipoDialogo = null
-                guardado
+                ).also { if (it == null) tipoDialogo = null }
+            }
+        )
+    }
+
+    // Si el movimiento desaparece (por ejemplo, se eliminó), el diálogo se cierra solo
+    editandoId?.let { id -> uiState.movimientos.firstOrNull { it.id == id } }?.let { movimiento ->
+        DialogoMovimiento(
+            tipo = movimiento.tipo,
+            categorias = uiState.categorias.filter { it.tipo == movimiento.tipo },
+            inicial = movimiento,
+            onCerrar = { editandoId = null },
+            onGuardar = { descripcion, monto, categoriaId ->
+                viewModel.actualizarMovimiento(movimiento.id, descripcion, monto, categoriaId)
+                    .also { if (it == null) editandoId = null }
             }
         )
     }
@@ -366,7 +384,8 @@ private fun ResumenMovimiento(
 private fun GastosPorCategoria(
     gastos: List<GastoCategoria>,
     totalGastos: Long,
-    onCategoriaClick: (Int) -> Unit
+    onCategoriaClick: (Int) -> Unit,
+    onGestionar: () -> Unit
 ) {
     Tarjeta(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -379,6 +398,13 @@ private fun GastosPorCategoria(
             Text("Gastos por Categoría", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800, modifier = Modifier.weight(1f))
             Text("${formatoCop(totalGastos)} COP", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TealOscuro)
         }
+        Text(
+            "Gestionar categorías ↗",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = TealMedio,
+            modifier = Modifier.clickable(onClick = onGestionar)
+        )
 
         // Barra de distribución porcentual
         Row(
@@ -432,26 +458,41 @@ private fun GastosPorCategoria(
     }
 }
 
+/**
+ * Formulario de movimiento. Sin [inicial] registra uno nuevo; con [inicial] lo edita
+ * (mismo formulario, con los campos precargados y el título "Editar").
+ * [onGuardar] devuelve null si se guardó, o el mensaje que se muestra al usuario.
+ */
 @Composable
 internal fun DialogoMovimiento(
     tipo: TipoMovimiento,
     categorias: List<Categoria>,
     onCerrar: () -> Unit,
-    onGuardar: (String, Long, Int) -> Boolean
+    inicial: Movimiento? = null,
+    onGuardar: (String, Long, Int) -> String?
 ) {
-    var descripcion by rememberSaveable(tipo) { mutableStateOf("") }
-    var montoTexto by rememberSaveable(tipo) { mutableStateOf("") }
-    var categoriaId by rememberSaveable(tipo) { mutableIntStateOf(categorias.firstOrNull()?.id ?: 0) }
-    var mostrarError by rememberSaveable(tipo) { mutableStateOf(false) }
+    val clave = inicial?.id
+    var descripcion by rememberSaveable(tipo, clave) { mutableStateOf(inicial?.descripcion ?: "") }
+    var montoTexto by rememberSaveable(tipo, clave) { mutableStateOf(inicial?.monto?.toString() ?: "") }
+    var categoriaId by rememberSaveable(tipo, clave) {
+        mutableIntStateOf(inicial?.categoriaId ?: categorias.firstOrNull()?.id ?: 0)
+    }
+    var error by rememberSaveable(tipo, clave) { mutableStateOf<String?>(null) }
+    val titulo = when {
+        inicial != null && tipo == TipoMovimiento.INGRESO -> "Editar ingreso"
+        inicial != null -> "Editar gasto"
+        tipo == TipoMovimiento.INGRESO -> "Agregar ingreso"
+        else -> "Registrar gasto"
+    }
 
     AlertDialog(
         onDismissRequest = onCerrar,
-        title = { Text(if (tipo == TipoMovimiento.INGRESO) "Agregar ingreso" else "Registrar gasto") },
+        title = { Text(titulo) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = descripcion,
-                    onValueChange = { descripcion = it; mostrarError = false },
+                    onValueChange = { descripcion = it; error = null },
                     label = { Text("Descripción") },
                     singleLine = true
                 )
@@ -459,7 +500,7 @@ internal fun DialogoMovimiento(
                     value = montoTexto,
                     onValueChange = { valor ->
                         montoTexto = valor.filter(Char::isDigit).take(11)
-                        mostrarError = false
+                        error = null
                     },
                     label = { Text("Monto en COP") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -468,27 +509,42 @@ internal fun DialogoMovimiento(
                 categorias.forEach { categoria ->
                     FilterChip(
                         selected = categoria.id == categoriaId,
-                        onClick = { categoriaId = categoria.id },
+                        onClick = { categoriaId = categoria.id; error = null },
                         label = { Text(categoria.nombre) }
                     )
                 }
-                if (mostrarError) {
-                    Text("Completa una descripción, un monto positivo y una categoría válida.", color = Rosa700, fontSize = 11.sp)
-                }
+                error?.let { AvisoError(it) }
             }
         },
         confirmButton = {
             Button(onClick = {
                 val monto = montoTexto.toLongOrNull()
-                mostrarError = monto == null || !onGuardar(descripcion, monto, categoriaId)
+                error = if (monto == null) OperacionesMovimiento.DATOS_INVALIDOS
+                else onGuardar(descripcion, monto, categoriaId)
             }) {
-                Text("Guardar")
+                Text(if (inicial != null) "Guardar cambios" else "Guardar")
             }
         },
         dismissButton = {
             TextButton(onClick = onCerrar) { Text("Cancelar") }
         }
     )
+}
+
+/** Recuadro rosado con ícono de advertencia para explicar por qué no se pudo guardar. */
+@Composable
+internal fun AvisoError(mensaje: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Rosa50, RoundedCornerShape(12.dp))
+            .padding(10.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Icon(Icons.Outlined.Warning, contentDescription = null, tint = Rosa600, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(mensaje, color = Rosa700, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+    }
 }
 
 @Composable
