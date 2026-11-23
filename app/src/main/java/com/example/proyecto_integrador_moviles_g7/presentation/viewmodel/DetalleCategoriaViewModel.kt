@@ -69,6 +69,12 @@ class DetalleCategoriaViewModel(
     fun actualizarCategoria(nombre: String, presupuesto: Long): Boolean =
         repository.actualizarCategoria(categoriaId, nombre, presupuesto)
 
+    /** Total de los movimientos de [tipo] (todas las categorías), opcionalmente solo de [mes]. */
+    fun totalDelTipo(tipo: TipoMovimiento, mes: java.time.YearMonth?): Long =
+        repository.state.value.movimientos
+            .filter { it.tipo == tipo && (mes == null || java.time.YearMonth.from(it.fecha) == mes) }
+            .sumOf { it.monto }
+
     /** Solo se puede eliminar si la categoría no tiene movimientos. */
     fun eliminarCategoria(): Boolean = repository.eliminarCategoria(categoriaId)
 

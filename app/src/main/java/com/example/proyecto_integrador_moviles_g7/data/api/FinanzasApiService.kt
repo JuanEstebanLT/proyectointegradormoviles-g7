@@ -1,6 +1,10 @@
 package com.example.proyecto_integrador_moviles_g7.data.api
 
 import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarCategoriaDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarConfiguracionDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarPerfilDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.ConfiguracionDto
+import com.example.proyecto_integrador_moviles_g7.data.dto.SugerenciaDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarMovimientoDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.ActualizarUsuarioDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.CategoriaDto
@@ -34,6 +38,23 @@ interface FinanzasApiService {
 
     @PUT("usuarios/{id}")
     suspend fun actualizarUsuario(@Path("id") id: Long, @Body datos: ActualizarUsuarioDto): UsuarioDto
+
+    @PUT("usuarios/{id}")
+    suspend fun actualizarPerfil(@Path("id") id: Long, @Body datos: ActualizarPerfilDto): UsuarioDto
+
+    /** Solo para administradores. */
+    @GET("usuarios")
+    suspend fun listarUsuarios(): List<UsuarioDto>
+
+    @GET("usuarios/{id}/configuracion")
+    suspend fun obtenerConfiguracion(@Path("id") id: Long): ConfiguracionDto
+
+    @PUT("usuarios/{id}/configuracion")
+    suspend fun actualizarConfiguracion(@Path("id") id: Long, @Body datos: ActualizarConfiguracionDto): ConfiguracionDto
+
+    /** Sugerencias que aplican al usuario según su mes actual. */
+    @GET("sugerencias")
+    suspend fun listarSugerencias(): List<SugerenciaDto>
 
     @GET("categorias")
     suspend fun listarCategorias(): List<CategoriaDto>

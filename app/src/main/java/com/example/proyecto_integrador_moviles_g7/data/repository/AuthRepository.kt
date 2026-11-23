@@ -43,5 +43,6 @@ fun UsuarioDto.aModelo() = Usuario(
     nombre = nombre,
     correo = correo,
     telefono = telefono.orEmpty(),
-    rol = rol
+    rol = rol,
+    miembroDesde = creadoEn?.let { runCatching { java.time.OffsetDateTime.parse(it).toLocalDate() }.getOrNull() }
 )

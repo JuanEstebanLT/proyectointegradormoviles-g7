@@ -1,95 +1,71 @@
 package com.example.proyecto_integrador_moviles_g7.presentation.screens
 
-import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Login
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.AlternateEmail
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.outlined.VerifiedUser
+import androidx.compose.material.icons.outlined.Mail
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
+import com.example.proyecto_integrador_moviles_g7.presentation.components.AvisoError
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BotonPrimario
+import com.example.proyecto_integrador_moviles_g7.presentation.components.LogoG7
+import com.example.proyecto_integrador_moviles_g7.presentation.components.TarjetaG7
+import com.example.proyecto_integrador_moviles_g7.presentation.components.coloresCampo
 import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.AuthViewModel
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar700
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar900
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Crema
 import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Proyectointegradormovilesg7Theme
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa600
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate200
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate400
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate500
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate700
 import com.example.proyecto_integrador_moviles_g7.ui.theme.TealMedio
 import com.example.proyecto_integrador_moviles_g7.ui.theme.TealOscuro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Turquesa
 
 @Composable
 fun AccesoScreen(
@@ -97,268 +73,196 @@ fun AccesoScreen(
     onIniciarSesion: () -> Unit,
     onRegistrarse: () -> Unit
 ) {
-    val context = LocalContext.current
-    val authState by viewModel.uiState.collectAsStateWithLifecycle()
+    val estado by viewModel.uiState.collectAsStateWithLifecycle()
     var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
-    var mostrarContrasena by remember { mutableStateOf(false) }
+    val foco = LocalFocusManager.current
 
-    LaunchedEffect(authState.usuario) {
-        if (authState.usuario != null) onIniciarSesion()
+    LaunchedEffect(estado.usuario) {
+        if (estado.usuario != null) onIniciarSesion()
     }
 
+    val entrar = {
+        foco.clearFocus()
+        viewModel.iniciarSesion(correo, contrasena)
+    }
+
+    PantallaAutenticacion(
+        titulo = "Bienvenido de nuevo",
+        subtitulo = "Ingresa para ver tu saldo, tus movimientos y tus metas."
+    ) {
+        CampoAutenticacion(
+            valor = correo,
+            onCambio = { correo = it; viewModel.limpiarError() },
+            etiqueta = "Correo electrónico",
+            icono = Icons.Outlined.Mail,
+            tipoTeclado = KeyboardType.Email,
+            accion = ImeAction.Next,
+            onAccion = { foco.moveFocus(androidx.compose.ui.focus.FocusDirection.Down) }
+        )
+        Spacer(Modifier.height(12.dp))
+        CampoContrasena(
+            valor = contrasena,
+            onCambio = { contrasena = it; viewModel.limpiarError() },
+            etiqueta = "Contraseña",
+            accion = ImeAction.Done,
+            onAccion = { entrar() }
+        )
+        estado.error?.let {
+            Spacer(Modifier.height(12.dp))
+            AvisoError(it)
+        }
+        Spacer(Modifier.height(20.dp))
+        BotonPrimario(
+            texto = "Iniciar sesión",
+            icono = Icons.AutoMirrored.Outlined.Login,
+            cargando = estado.cargando,
+            onClick = entrar
+        )
+        Spacer(Modifier.height(16.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text("¿No tienes cuenta? ", color = Slate500, fontSize = 14.sp)
+            Text(
+                "Regístrate",
+                color = TealOscuro,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .clickable(onClick = onRegistrarse)
+                    .padding(vertical = 6.dp)
+            )
+        }
+    }
+}
+
+/** Cabecera petróleo con el isotipo G7 y una tarjeta blanca con el formulario. */
+@Composable
+internal fun PantallaAutenticacion(
+    titulo: String,
+    subtitulo: String,
+    onAtras: (() -> Unit)? = null,
+    contenido: @Composable ColumnScope.() -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(FondoClaro)
+            .imePadding()
             .verticalScroll(rememberScrollState())
-    ) {
-        EncabezadoMarca()
-
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .offset(y = (-16).dp)
-        ) {
-            Tarjeta(relleno = PaddingValues(24.dp), espaciado = 16.dp) {
-                Column {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Correo Electrónico", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Slate700)
-                        Text("Banca Personal", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TealMedio)
-                    }
-                    Spacer(Modifier.height(6.dp))
-                    CampoTexto(
-                        valor = correo,
-                        onCambio = { correo = it; viewModel.limpiarError() },
-                        icono = Icons.Outlined.AlternateEmail,
-                        placeholder = "ejemplo@correo.com",
-                        tipoTeclado = KeyboardType.Email
-                    )
-                }
-
-                Column {
-                    Text("Contraseña", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Slate700)
-                    Spacer(Modifier.height(6.dp))
-                    CampoTexto(
-                        valor = contrasena,
-                        onCambio = { contrasena = it; viewModel.limpiarError() },
-                        icono = Icons.Outlined.Lock,
-                        placeholder = "••••••••",
-                        tipoTeclado = KeyboardType.Password,
-                        transformacion = if (mostrarContrasena) VisualTransformation.None else PasswordVisualTransformation(),
-                        iconoFinal = {
-                            IconButton(onClick = { mostrarContrasena = !mostrarContrasena }) {
-                                Icon(
-                                    if (mostrarContrasena) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                                    contentDescription = if (mostrarContrasena) "Ocultar contraseña" else "Mostrar contraseña",
-                                    tint = Slate400
-                                )
-                            }
-                        }
-                    )
-                }
-
-                TextButton(
-                    onClick = { Toast.makeText(context, "Recuperación de contraseña pendiente", Toast.LENGTH_SHORT).show() },
-                    modifier = Modifier.align(Alignment.End),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text("¿Olvidaste tu contraseña?", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TealOscuro)
-                    Spacer(Modifier.width(4.dp))
-                    Icon(Icons.AutoMirrored.Outlined.ArrowForward, null, tint = TealOscuro, modifier = Modifier.size(14.dp))
-                }
-
-                Button(
-                    onClick = { viewModel.iniciarSesion(correo, contrasena) },
-                    enabled = !authState.cargando,
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = TealOscuro)
-                ) {
-                    if (authState.cargando) {
-                        CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
-                    } else {
-                        Text("Iniciar sesión", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Spacer(Modifier.width(8.dp))
-                        Icon(Icons.AutoMirrored.Outlined.Login, null, modifier = Modifier.size(18.dp))
-                    }
-                }
-
-                OutlinedButton(
-                    onClick = { Toast.makeText(context, "Acceso biométrico pendiente", Toast.LENGTH_SHORT).show() },
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Turquesa.copy(alpha = 0.4f)),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = AguaClaro.copy(alpha = 0.3f),
-                        contentColor = TealOscuro
-                    )
-                ) {
-                    Icon(Icons.Outlined.Fingerprint, null, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text("Ingresar con huella digital", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            if (authState.error != null) Rosa50 else Crema.copy(alpha = 0.5f),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        if (authState.error != null) Icons.Outlined.ErrorOutline else Icons.Outlined.Security,
-                        null,
-                        tint = if (authState.error != null) Rosa600 else Ambar700,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        authState.error ?: "Tu sesión se valida con la Finanzas G7 API y tus datos quedan guardados en la nube.",
-                        fontSize = 11.sp,
-                        lineHeight = 14.sp,
-                        color = if (authState.error != null) Rosa600 else Ambar900
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                HorizontalDivider(Modifier.weight(1f), color = Slate200)
-                Text(
-                    "O CONTINÚA CON",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.sp,
-                    color = Slate400,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-                HorizontalDivider(Modifier.weight(1f), color = Slate200)
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            OutlinedButton(
-                onClick = { Toast.makeText(context, "Acceso con Google pendiente", Toast.LENGTH_SHORT).show() },
-                modifier = Modifier.fillMaxWidth().height(46.dp),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Slate200),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = Slate700)
-            ) {
-                Text(
-                    buildAnnotatedString {
-                        withStyle(SpanStyle(color = Color(0xFF4285F4), fontWeight = FontWeight.Black)) { append("G") }
-                        append("   Google")
-                    },
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("¿No tienes una cuenta?", fontSize = 12.sp, color = Slate500)
-            TextButton(onClick = onRegistrarse) {
-                Text("Regístrate", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TealOscuro)
-            }
-        }
-    }
-}
-
-@Composable
-private fun EncabezadoMarca() {
-    val forma = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(8.dp, forma)
-            .background(TealOscuro, forma)
-            .statusBarsPadding()
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(64.dp)
-                .background(Turquesa, RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .background(TealOscuro, RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
+                .statusBarsPadding()
+                .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 64.dp)
         ) {
-            Icon(Icons.Outlined.AccountBalanceWallet, null, tint = TealOscuro, modifier = Modifier.size(32.dp))
+            Column {
+                if (onAtras != null) {
+                    IconButton(onClick = onAtras, modifier = Modifier.offset(x = (-12).dp)) {
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                    }
+                } else {
+                    Spacer(Modifier.height(24.dp))
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    LogoG7(tamano = 48.dp, tamanoTexto = 18.sp, radio = 14.dp)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text("Finanzas G7", color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp)
+                        Text("Tus finanzas personales en COP", color = AguaClaro, fontSize = 12.sp)
+                    }
+                }
+                Spacer(Modifier.height(28.dp))
+                Text(titulo, color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp)
+                Spacer(Modifier.height(6.dp))
+                Text(subtitulo, color = AguaClaro, fontSize = 14.sp, lineHeight = 20.sp)
+            }
         }
-        Spacer(Modifier.height(16.dp))
+        TarjetaG7(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .offset(y = (-40).dp),
+            radio = 24.dp,
+            contenido = contenido
+        )
         Row(
             modifier = Modifier
-                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+                .fillMaxWidth()
+                .offset(y = (-24).dp)
+                .navigationBarsPadding()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Outlined.VerifiedUser, null, tint = AguaClaro, modifier = Modifier.size(12.dp))
+            Icon(Icons.Outlined.Shield, contentDescription = null, tint = TealMedio, modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(6.dp))
-            Text("Finanzas G7 • Colombia", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = AguaClaro)
+            Text("Contraseñas cifradas con bcrypt • Sesión con token JWT", color = Slate500, fontSize = 11.sp)
         }
-        Spacer(Modifier.height(8.dp))
-        Text("Bienvenido de nuevo", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Inicia sesión para gestionar tus finanzas personales",
-            fontSize = 12.sp,
-            color = AguaClaro.copy(alpha = 0.8f),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(max = 260.dp)
-        )
     }
 }
 
 @Composable
-internal fun CampoTexto(
+internal fun CampoAutenticacion(
     valor: String,
     onCambio: (String) -> Unit,
+    etiqueta: String,
     icono: ImageVector,
-    placeholder: String,
-    tipoTeclado: KeyboardType,
-    transformacion: VisualTransformation = VisualTransformation.None,
-    iconoFinal: (@Composable () -> Unit)? = null
+    tipoTeclado: KeyboardType = KeyboardType.Text,
+    accion: ImeAction = ImeAction.Next,
+    onAccion: () -> Unit = {},
+    error: String? = null,
+    prefijo: String? = null
 ) {
     OutlinedTextField(
         value = valor,
         onValueChange = onCambio,
         modifier = Modifier.fillMaxWidth(),
+        label = { Text(etiqueta) },
+        leadingIcon = { Icon(icono, contentDescription = null, tint = TealMedio) },
+        prefix = prefijo?.let { { Text(it) } },
         singleLine = true,
-        placeholder = { Text(placeholder, fontSize = 14.sp, color = Slate400) },
-        leadingIcon = { Icon(icono, null, tint = Slate400, modifier = Modifier.size(20.dp)) },
-        trailingIcon = iconoFinal,
-        visualTransformation = transformacion,
-        keyboardOptions = KeyboardOptions(keyboardType = tipoTeclado),
-        shape = RoundedCornerShape(12.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = Slate50,
-            focusedContainerColor = Color.White,
-            unfocusedBorderColor = Slate200,
-            focusedBorderColor = TealMedio
-        )
+        isError = error != null,
+        supportingText = error?.let { { Text(it, color = Rosa600) } },
+        keyboardOptions = KeyboardOptions(keyboardType = tipoTeclado, imeAction = accion),
+        keyboardActions = KeyboardActions(onAny = { onAccion() }),
+        shape = RoundedCornerShape(16.dp),
+        colors = coloresCampo()
     )
 }
 
-@Preview(showBackground = true, heightDp = 900)
 @Composable
-private fun AccesoScreenPreview() {
-    val previewViewModel: AuthViewModel = viewModel()
-    Proyectointegradormovilesg7Theme {
-        AccesoScreen(
-            viewModel = previewViewModel,
-            onIniciarSesion = {},
-            onRegistrarse = {}
-        )
-    }
+internal fun CampoContrasena(
+    valor: String,
+    onCambio: (String) -> Unit,
+    etiqueta: String,
+    accion: ImeAction = ImeAction.Done,
+    onAccion: () -> Unit = {},
+    error: String? = null
+) {
+    var visible by rememberSaveable { mutableStateOf(false) }
+    OutlinedTextField(
+        value = valor,
+        onValueChange = onCambio,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text(etiqueta) },
+        leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = TealMedio) },
+        trailingIcon = {
+            IconButton(onClick = { visible = !visible }) {
+                Icon(
+                    if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                    contentDescription = if (visible) "Ocultar contraseña" else "Mostrar contraseña",
+                    tint = Slate500
+                )
+            }
+        },
+        visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
+        singleLine = true,
+        isError = error != null,
+        supportingText = error?.let { { Text(it, color = Rosa600) } },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = accion),
+        keyboardActions = KeyboardActions(onAny = { onAccion() }),
+        shape = RoundedCornerShape(16.dp),
+        colors = coloresCampo()
+    )
 }

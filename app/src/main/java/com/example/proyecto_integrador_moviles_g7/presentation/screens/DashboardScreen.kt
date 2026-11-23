@@ -1,5 +1,7 @@
 package com.example.proyecto_integrador_moviles_g7.presentation.screens
 
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,603 +16,315 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Payments
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.RemoveCircle
+import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.Savings
-import androidx.compose.material.icons.outlined.SwapHoriz
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
-import com.example.proyecto_integrador_moviles_g7.data.model.Movimiento
 import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
-import com.example.proyecto_integrador_moviles_g7.data.repository.InMemoryFinanzasRepository
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraNavegacionG7
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraProgreso
+import com.example.proyecto_integrador_moviles_g7.presentation.components.CajaIcono
+import com.example.proyecto_integrador_moviles_g7.presentation.components.EncabezadoPrincipal
+import com.example.proyecto_integrador_moviles_g7.presentation.components.Etiqueta
+import com.example.proyecto_integrador_moviles_g7.presentation.components.EstadoVacio
 import com.example.proyecto_integrador_moviles_g7.presentation.components.FilaMovimiento
-import com.example.proyecto_integrador_moviles_g7.presentation.components.LogoG7
-import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
+import com.example.proyecto_integrador_moviles_g7.presentation.components.SeccionPrincipal
+import com.example.proyecto_integrador_moviles_g7.presentation.components.TarjetaG7
+import com.example.proyecto_integrador_moviles_g7.presentation.components.TituloSeccion
+import com.example.proyecto_integrador_moviles_g7.presentation.components.colorUsoPresupuesto
 import com.example.proyecto_integrador_moviles_g7.presentation.components.formatoCop
+import com.example.proyecto_integrador_moviles_g7.presentation.components.iconoCategoria
+import com.example.proyecto_integrador_moviles_g7.presentation.components.nombreMes
 import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.DashboardViewModel
-import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.GastoCategoria
-import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.OperacionesMovimiento
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Crema
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda300
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda400
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda600
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda700
 import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Proyectointegradormovilesg7Theme
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa400
+import com.example.proyecto_integrador_moviles_g7.ui.theme.HieloSuave
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa600
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa700
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate100
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate400
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate500
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate600
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate800
-import com.example.proyecto_integrador_moviles_g7.ui.theme.TealMedio
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate900
 import com.example.proyecto_integrador_moviles_g7.ui.theme.TealOscuro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Turquesa
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-private val localeColombia: Locale = Locale.forLanguageTag("es-CO")
-
-/** Mes y año actuales, por ejemplo "Octubre 2026". */
-fun periodoActual(fecha: LocalDate = LocalDate.now()): String =
-    fecha.format(DateTimeFormatter.ofPattern("MMMM yyyy", localeColombia))
-        .replaceFirstChar { it.titlecase(localeColombia) }
+/** Colores para distinguir categorías en las barras y gráficos. */
+internal val paletaCategorias = listOf(
+    Color(0xFF164D5A), Color(0xFF248397), Color(0xFF52E7D2), Color(0xFFE11D48),
+    Color(0xFFF59E0B), Color(0xFF059669), Color(0xFF7C3AED), Color(0xFF94A3B8)
+)
 
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
-    onCategoriaClick: (categoriaId: Int) -> Unit,
-    onDestino: (String) -> Unit = {},
-    onPerfil: () -> Unit = {},
-    onNotificaciones: () -> Unit = {}
+    cargando: Boolean,
+    onSeccion: (SeccionPrincipal) -> Unit,
+    onPerfil: () -> Unit,
+    onNotificaciones: () -> Unit,
+    onCategoriaClick: (Int) -> Unit,
+    onCategorias: () -> Unit,
+    onRegistrar: (TipoMovimiento) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var tipoDialogo by rememberSaveable { mutableStateOf<TipoMovimiento?>(null) }
-    var editandoId by rememberSaveable { mutableStateOf<String?>(null) }
+    val estado by viewModel.uiState.collectAsStateWithLifecycle()
+    val usuario = viewModel.usuario
+    val context = LocalContext.current
+    var editandoId by remember { mutableStateOf<String?>(null) }
+    val nombreCategoria = { id: Int -> estado.categorias.firstOrNull { it.id == id }?.nombre ?: "Sin categoría" }
+    val mes = estado.mesActual
 
     Scaffold(
         containerColor = FondoClaro,
-        topBar = { BarraDashboard(onPerfil, onNotificaciones) },
-        bottomBar = { BarraNavegacionInferior(onDestino = onDestino) }
-    ) { innerPadding ->
-        Column(
+        topBar = {
+            EncabezadoPrincipal(
+                titulo = usuario?.nombre ?: "Finanzas G7",
+                subtitulo = "Bienvenido de nuevo,",
+                iniciales = usuario?.iniciales ?: "G7",
+                notificacionesSinLeer = estado.notificacionesSinLeer,
+                onNotificaciones = onNotificaciones,
+                onPerfil = onPerfil
+            )
+        },
+        bottomBar = { BarraNavegacionG7(SeccionPrincipal.INICIO, onSeccion) }
+    ) { relleno ->
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+                .padding(relleno),
+            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        periodoActual().uppercase(localeColombia),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.sp,
-                        color = TealMedio
-                    )
-                    Text("Hola, Usuario 👋", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Slate800)
-                }
-                Text(
-                    "COP",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TealOscuro,
-                    modifier = Modifier
-                        .background(Turquesa.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
-                        .padding(horizontal = 6.dp, vertical = 6.dp)
-                )
-            }
+            item { TarjetaSaldo(estado.saldoDisponible, mes.ingresos, mes.gastos, nombreMes(mes.mes), cargando) }
 
-            TarjetaSaldo(
-                saldo = uiState.saldoDisponible,
-                saldoInicial = uiState.saldoInicial,
-                ingresos = uiState.totalIngresos,
-                gastos = uiState.totalGastos
-            )
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = { tipoDialogo = TipoMovimiento.INGRESO },
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Turquesa, contentColor = TealOscuro),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Icon(Icons.Outlined.AddCircle, null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Agregar Ingreso", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                }
-                Button(
-                    onClick = { tipoDialogo = TipoMovimiento.GASTO },
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Crema, contentColor = Rosa700),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Icon(Icons.Outlined.RemoveCircle, null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Registrar Gasto", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    BotonAccion("Nuevo ingreso", Icons.Outlined.AddCircleOutline, Esmeralda50, Esmeralda600, Modifier.weight(1f)) {
+                        onRegistrar(TipoMovimiento.INGRESO)
+                    }
+                    BotonAccion("Nuevo gasto", Icons.Outlined.RemoveCircleOutline, Rosa50, Rosa600, Modifier.weight(1f)) {
+                        onRegistrar(TipoMovimiento.GASTO)
+                    }
                 }
             }
 
-            GastosPorCategoria(
-                gastos = uiState.gastosPorCategoria,
-                totalGastos = uiState.totalGastos,
-                onCategoriaClick = onCategoriaClick,
-                onGestionar = { onDestino("Categorías") }
-            )
-
-            MetaAhorro(onClick = { onDestino("Ahorro") })
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Movimientos Recientes", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800, modifier = Modifier.weight(1f))
-                    Text(
-                        "Ver todo el historial ↗",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TealMedio,
-                        modifier = Modifier.clickable { onDestino("Movimientos") }
-                    )
-                }
-                if (uiState.movimientosRecientes.isEmpty()) {
-                    Text("Aún no hay movimientos", fontSize = 12.sp, color = Slate500)
-                }
-                uiState.movimientosRecientes.forEach { movimiento ->
-                    val categoria = uiState.categorias.firstOrNull { it.id == movimiento.categoriaId }
-                    val estilo = estiloCategoria(categoria?.nombre)
-                    val esIngreso = movimiento.tipo == TipoMovimiento.INGRESO
-                    FilaMovimiento(
-                        icono = estilo.icono,
-                        fondoIcono = estilo.fondoIcono,
-                        colorIcono = if (esIngreso) TealOscuro else estilo.color,
-                        titulo = movimiento.descripcion,
-                        detalle = detalleMovimiento(movimiento, categoria?.nombre ?: "Sin categoría"),
-                        monto = movimiento.montoConSigno,
-                        colorMonto = if (esIngreso) Esmeralda600 else Rosa600,
-                        colorDetalle = if (esIngreso) Esmeralda700 else Slate500,
-                        fondoDetalle = if (esIngreso) Esmeralda50 else Color.Transparent,
-                        onEditar = { editandoId = movimiento.id }
-                    )
-                }
-            }
-        }
-    }
-
-    tipoDialogo?.let { tipo ->
-        DialogoMovimiento(
-            tipo = tipo,
-            categorias = uiState.categorias.filter { it.tipo == tipo },
-            onCerrar = { tipoDialogo = null },
-            onGuardar = { descripcion, monto, categoriaId ->
-                viewModel.agregarMovimiento(
-                    descripcion = descripcion,
-                    monto = monto,
-                    tipo = tipo,
-                    categoriaId = categoriaId
-                ).also { if (it == null) tipoDialogo = null }
-            }
-        )
-    }
-
-    // Si el movimiento desaparece (por ejemplo, se eliminó), el diálogo se cierra solo
-    editandoId?.let { id -> uiState.movimientos.firstOrNull { it.id == id } }?.let { movimiento ->
-        DialogoMovimiento(
-            tipo = movimiento.tipo,
-            categorias = uiState.categorias.filter { it.tipo == movimiento.tipo },
-            inicial = movimiento,
-            onCerrar = { editandoId = null },
-            onGuardar = { descripcion, monto, categoriaId ->
-                viewModel.actualizarMovimiento(movimiento.id, descripcion, monto, categoriaId)
-                    .also { if (it == null) editandoId = null }
-            }
-        )
-    }
-}
-
-@Composable
-private fun BarraDashboard(onPerfil: () -> Unit, onNotificaciones: () -> Unit) {
-    Column(Modifier.background(Color.White)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            LogoG7(tamano = 32.dp, tamanoTexto = 12.sp, radio = 8.dp)
-            Spacer(Modifier.width(10.dp))
-            Column(Modifier.weight(1f)) {
-                Text("FINANZAS G7", fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = Slate400)
-                Text("Dashboard", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Slate800)
-            }
-            IconButton(onClick = onNotificaciones) {
-                Icon(Icons.Outlined.Notifications, contentDescription = "Notificaciones", tint = Slate600)
-            }
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable(onClick = onPerfil)
-                    .background(TealOscuro, RoundedCornerShape(50)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Outlined.Person, contentDescription = "Perfil", tint = Color.White, modifier = Modifier.size(16.dp))
-            }
-        }
-        HorizontalDivider(color = Slate100)
-    }
-}
-
-@Composable
-private fun TarjetaSaldo(saldo: Long, saldoInicial: Long, ingresos: Long, gastos: Long) {
-    var saldoVisible by rememberSaveable { mutableStateOf(true) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(TealOscuro, RoundedCornerShape(24.dp))
-            .padding(20.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Saldo disponible actual", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = AguaClaro.copy(alpha = 0.8f))
-            Icon(
-                if (saldoVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
-                contentDescription = if (saldoVisible) "Ocultar saldo" else "Mostrar saldo",
-                tint = AguaClaro.copy(alpha = 0.8f),
-                modifier = Modifier
-                    .padding(start = 6.dp)
-                    .size(16.dp)
-                    .clickable { saldoVisible = !saldoVisible }
-            )
-            Spacer(Modifier.weight(1f))
-            Text(
-                "↗ +14.5% mes",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = Esmeralda300,
-                modifier = Modifier
-                    .background(Esmeralda400.copy(alpha = 0.2f), RoundedCornerShape(50))
-                    .padding(horizontal = 10.dp, vertical = 2.dp)
-            )
-        }
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                if (saldoVisible) formatoCop(saldo) else "$ ••••••",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White
-            )
-            Spacer(Modifier.width(8.dp))
-            Text("COP", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Turquesa, modifier = Modifier.padding(bottom = 6.dp))
-        }
-        Spacer(Modifier.height(16.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ResumenMovimiento(Modifier.weight(1f), "Ingresos", ingresos, Icons.Outlined.ArrowDownward, Esmeralda400, saldoVisible)
-            ResumenMovimiento(Modifier.weight(1f), "Gastos", gastos, Icons.Outlined.ArrowUpward, Rosa400, saldoVisible)
-        }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "Saldo inicial: ${if (saldoVisible) formatoCop(saldoInicial) else "$ ••••"} COP",
-            fontSize = 10.sp,
-            color = AguaClaro.copy(alpha = 0.8f)
-        )
-    }
-}
-
-@Composable
-private fun ResumenMovimiento(
-    modifier: Modifier,
-    titulo: String,
-    valor: Long,
-    icono: ImageVector,
-    colorIcono: Color,
-    visible: Boolean
-) {
-    Column(
-        modifier = modifier
-            .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-            .padding(12.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icono, null, tint = colorIcono, modifier = Modifier.size(14.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(titulo, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = AguaClaro)
-        }
-        Spacer(Modifier.height(4.dp))
-        Text(if (visible) formatoCop(valor) else "$ ••••", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-    }
-}
-
-@Composable
-private fun GastosPorCategoria(
-    gastos: List<GastoCategoria>,
-    totalGastos: Long,
-    onCategoriaClick: (Int) -> Unit,
-    onGestionar: () -> Unit
-) {
-    Tarjeta(modifier = Modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                Modifier
-                    .size(width = 6.dp, height = 14.dp)
-                    .background(TealMedio, RoundedCornerShape(50))
-            )
-            Spacer(Modifier.width(8.dp))
-            Text("Gastos por Categoría", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800, modifier = Modifier.weight(1f))
-            Text("${formatoCop(totalGastos)} COP", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TealOscuro)
-        }
-        Text(
-            "Gestionar categorías ↗",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = TealMedio,
-            modifier = Modifier.clickable(onClick = onGestionar)
-        )
-
-        // Barra de distribución porcentual
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Slate100)
-        ) {
-            gastos.filter { it.total > 0L }.forEach { gasto ->
-                val estilo = estiloCategoria(gasto.categoria.nombre)
-                Box(
-                    Modifier
-                        .weight(gasto.total.toFloat())
-                        .fillMaxHeight()
-                        .background(estilo.color)
-                )
-            }
-        }
-
-        gastos.chunked(2).forEach { fila ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                fila.forEach { gasto ->
-                    val categoria = gasto.categoria
-                    val estilo = estiloCategoria(categoria.nombre)
-                    val porcentaje = if (totalGastos == 0L) 0f else gasto.total * 100f / totalGastos
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Slate50)
-                            .clickable { onCategoriaClick(categoria.id) }
-                            .padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(estilo.icono, null, tint = estilo.color, modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Column {
-                            Text(
-                                "${categoria.nombre} (${String.format(localeColombia, "%.1f", porcentaje)}%)",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Slate500
+            item {
+                TarjetaG7 {
+                    TituloSeccion("Gastos por categoría", "Gestionar ↗", onCategorias)
+                    Text("${nombreMes(mes.mes)} • ${formatoCop(mes.gastos)} COP", fontSize = 12.sp, color = Slate500)
+                    Spacer(Modifier.height(12.dp))
+                    val conGasto = mes.gastosPorCategoria.filter { it.total > 0L }
+                    if (conGasto.isEmpty()) {
+                        Text("Aún no registras gastos este mes.", fontSize = 13.sp, color = Slate500)
+                    } else {
+                        // Barra apilada con la participación de cada categoría
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(50))
+                        ) {
+                            conGasto.forEachIndexed { i, uso ->
+                                Box(
+                                    Modifier
+                                        .weight(uso.participacion.coerceAtLeast(1f))
+                                        .fillMaxHeight()
+                                        .background(paletaCategorias[i % paletaCategorias.size])
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        conGasto.take(4).forEachIndexed { i, uso ->
+                            FilaCategoriaResumen(
+                                nombre = uso.categoria.nombre,
+                                total = uso.total,
+                                presupuesto = uso.presupuesto,
+                                color = paletaCategorias[i % paletaCategorias.size],
+                                onClick = { onCategoriaClick(uso.categoria.id) }
                             )
-                            Text(formatoCop(gasto.total), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800)
                         }
                     }
                 }
             }
-        }
-    }
-}
 
-/**
- * Formulario de movimiento. Sin [inicial] registra uno nuevo; con [inicial] lo edita
- * (mismo formulario, con los campos precargados y el título "Editar").
- * [onGuardar] devuelve null si se guardó, o el mensaje que se muestra al usuario.
- */
-@Composable
-internal fun DialogoMovimiento(
-    tipo: TipoMovimiento,
-    categorias: List<Categoria>,
-    onCerrar: () -> Unit,
-    inicial: Movimiento? = null,
-    onGuardar: (String, Long, Int) -> String?
-) {
-    val clave = inicial?.id
-    var descripcion by rememberSaveable(tipo, clave) { mutableStateOf(inicial?.descripcion ?: "") }
-    var montoTexto by rememberSaveable(tipo, clave) { mutableStateOf(inicial?.monto?.toString() ?: "") }
-    var categoriaId by rememberSaveable(tipo, clave) {
-        mutableIntStateOf(inicial?.categoriaId ?: categorias.firstOrNull()?.id ?: 0)
-    }
-    var error by rememberSaveable(tipo, clave) { mutableStateOf<String?>(null) }
-    val titulo = when {
-        inicial != null && tipo == TipoMovimiento.INGRESO -> "Editar ingreso"
-        inicial != null -> "Editar gasto"
-        tipo == TipoMovimiento.INGRESO -> "Agregar ingreso"
-        else -> "Registrar gasto"
-    }
+            item {
+                TarjetaMetaAhorro(meta = estado.metaAhorro, ahorrado = mes.ahorro) { onSeccion(SeccionPrincipal.AHORRO) }
+            }
 
-    AlertDialog(
-        onDismissRequest = onCerrar,
-        title = { Text(titulo) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = descripcion,
-                    onValueChange = { descripcion = it; error = null },
-                    label = { Text("Descripción") },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = montoTexto,
-                    onValueChange = { valor ->
-                        montoTexto = valor.filter(Char::isDigit).take(11)
-                        error = null
-                    },
-                    label = { Text("Monto en COP") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
-                )
-                categorias.forEach { categoria ->
-                    FilterChip(
-                        selected = categoria.id == categoriaId,
-                        onClick = { categoriaId = categoria.id; error = null },
-                        label = { Text(categoria.nombre) }
-                    )
+            item { TituloSeccion("Movimientos recientes", "Ver todos") { onSeccion(SeccionPrincipal.MOVIMIENTOS) } }
+
+            if (estado.movimientosRecientes.isEmpty()) {
+                item {
+                    if (cargando) {
+                        Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = TealOscuro)
+                        }
+                    } else {
+                        EstadoVacio(
+                            Icons.Outlined.ReceiptLong,
+                            "Sin movimientos todavía",
+                            "Registra tu primer ingreso o gasto con los botones de arriba."
+                        )
+                    }
                 }
-                error?.let { AvisoError(it) }
             }
-        },
-        confirmButton = {
-            Button(onClick = {
-                val monto = montoTexto.toLongOrNull()
-                error = if (monto == null) OperacionesMovimiento.DATOS_INVALIDOS
-                else onGuardar(descripcion, monto, categoriaId)
-            }) {
-                Text(if (inicial != null) "Guardar cambios" else "Guardar")
+            items(estado.movimientosRecientes, key = { it.id }) { movimiento ->
+                FilaMovimiento(movimiento, nombreCategoria(movimiento.categoriaId)) { editandoId = movimiento.id }
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onCerrar) { Text("Cancelar") }
         }
-    )
-}
+    }
 
-/** Recuadro rosado con ícono de advertencia para explicar por qué no se pudo guardar. */
-@Composable
-internal fun AvisoError(mensaje: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Rosa50, RoundedCornerShape(12.dp))
-            .padding(10.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Icon(Icons.Outlined.Warning, contentDescription = null, tint = Rosa600, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(mensaje, color = Rosa700, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+    estado.movimientos.firstOrNull { it.id == editandoId }?.let { movimiento ->
+        HojaEditarMovimiento(
+            movimiento = movimiento,
+            categorias = estado.categorias,
+            onCerrar = { editandoId = null },
+            onGuardar = { d, m, c -> viewModel.actualizarMovimiento(movimiento.id, d, m, c) },
+            onEliminar = {
+                viewModel.eliminarMovimiento(movimiento.id).also { msg ->
+                    if (msg != null) Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                }
+            }
+        )
     }
 }
 
 @Composable
-private fun MetaAhorro(onClick: () -> Unit) {
+private fun TarjetaSaldo(disponible: Long, ingresosMes: Long, gastosMes: Long, mes: String, cargando: Boolean) {
+    Surface(shape = RoundedCornerShape(26.dp), color = TealOscuro, shadowElevation = 4.dp) {
+        Column(Modifier.fillMaxWidth().padding(20.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text("SALDO DISPONIBLE", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Turquesa)
+                if (cargando) CircularProgressIndicator(color = Turquesa, strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
+                else Etiqueta(mes, fondo = Color.White.copy(alpha = 0.15f), color = Color.White)
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                (if (disponible < 0) "- " else "") + formatoCop(disponible) + " COP",
+                fontSize = 30.sp, fontWeight = FontWeight.Black, color = Color.White
+            )
+            if (disponible < 0) {
+                Text("Tu saldo está en negativo: registra un ingreso o reduce un gasto.", fontSize = 12.sp, color = Color(0xFFFECDD3))
+            }
+            Spacer(Modifier.height(18.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                MiniTotal("Ingresos del mes", "+ ${formatoCop(ingresosMes)}", Icons.Outlined.ArrowDownward, Esmeralda50, Esmeralda600, Modifier.weight(1f))
+                MiniTotal("Gastos del mes", "- ${formatoCop(gastosMes)}", Icons.Outlined.ArrowUpward, Rosa50, Rosa600, Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun MiniTotal(titulo: String, valor: String, icono: ImageVector, fondo: Color, tinte: Color, modifier: Modifier) {
+    Surface(modifier = modifier, color = Color.White.copy(alpha = 0.10f), shape = RoundedCornerShape(16.dp)) {
+        Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(30.dp).clip(CircleShape).background(fondo), contentAlignment = Alignment.Center) {
+                Icon(icono, contentDescription = null, tint = tinte, modifier = Modifier.size(16.dp))
+            }
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text(titulo, fontSize = 11.sp, color = AguaClaro, maxLines = 1)
+                Text(valor, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BotonAccion(texto: String, icono: ImageVector, fondo: Color, color: Color, modifier: Modifier, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(52.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = fondo, contentColor = color),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.3f))
+    ) {
+        Icon(icono, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(texto, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    }
+}
+
+@Composable
+internal fun FilaCategoriaResumen(nombre: String, total: Long, presupuesto: Long, color: Color, onClick: () -> Unit) {
     Row(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Crema.copy(alpha = 0.7f))
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(14.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .background(Color.White, RoundedCornerShape(12.dp))
-                .padding(8.dp)
-        ) {
-            Icon(Icons.Outlined.Savings, null, tint = Esmeralda600, modifier = Modifier.size(20.dp))
-        }
-        Spacer(Modifier.width(12.dp))
+        CajaIcono(iconoCategoria(nombre), fondo = color.copy(alpha = 0.12f), tinte = color, tamano = 36.dp, tamanoIcono = 18.dp, radio = 10.dp)
+        Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
-            Text("Meta de ahorro mensual", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Slate800)
-            Text("78% completado • ${formatoCop(1_560_000)} COP", fontSize = 11.sp, color = Slate500)
-        }
-        Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Slate400)
-    }
-}
-
-@Composable
-internal fun BarraNavegacionInferior(onDestino: (String) -> Unit, seleccionado: String = "Inicio") {
-    val destinos = listOf(
-        "Inicio" to Icons.Outlined.Home,
-        "Movimientos" to Icons.Outlined.SwapHoriz,
-        "Informes" to Icons.Outlined.BarChart,
-        "Ahorro" to Icons.Outlined.Savings
-    )
-    NavigationBar(containerColor = Color.White) {
-        destinos.forEachIndexed { indice, (nombre, icono) ->
-            NavigationBarItem(
-                selected = nombre == seleccionado,
-                onClick = { onDestino(nombre) },
-                icon = { Icon(icono, contentDescription = nombre) },
-                label = { Text(nombre, fontSize = 10.sp, fontWeight = if (nombre == seleccionado) FontWeight.Bold else FontWeight.Medium) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = TealOscuro,
-                    selectedTextColor = TealOscuro,
-                    indicatorColor = AguaClaro,
-                    unselectedIconColor = Slate400,
-                    unselectedTextColor = Slate400
-                )
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Slate900, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(formatoCop(total), fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = Slate900)
+            }
+            if (presupuesto > 0L) {
+                val porcentaje = total * 100f / presupuesto
+                Spacer(Modifier.height(4.dp))
+                BarraProgreso(porcentaje / 100f, colorUsoPresupuesto(porcentaje), alto = 6.dp)
+                Text("${porcentaje.toInt()} % de ${formatoCop(presupuesto)}", fontSize = 11.sp, color = Slate500)
+            } else {
+                Text("Sin presupuesto", fontSize = 11.sp, color = Slate500)
+            }
         }
     }
 }
 
-@Preview(showBackground = true, heightDp = 1100)
 @Composable
-private fun DashboardScreenPreview() {
-    val previewViewModel: DashboardViewModel = viewModel(
-        factory = DashboardViewModel.factory(InMemoryFinanzasRepository())
-    )
-    Proyectointegradormovilesg7Theme {
-        DashboardScreen(
-            viewModel = previewViewModel,
-            onCategoriaClick = {}
-        )
+private fun TarjetaMetaAhorro(meta: Long, ahorrado: Long, onClick: () -> Unit) {
+    TarjetaG7(fondo = HieloSuave, borde = Turquesa.copy(alpha = 0.4f), onClick = onClick) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CajaIcono(Icons.Outlined.Savings, fondo = Turquesa, tinte = TealOscuro)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Meta de ahorro", fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, color = Slate900)
+                if (meta > 0L) {
+                    Text("${formatoCop(ahorrado)} de ${formatoCop(meta)} COP este mes", fontSize = 12.sp, color = Slate500)
+                } else {
+                    Text("Define cuánto quieres ahorrar cada mes →", fontSize = 12.sp, color = TealOscuro, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            if (meta > 0L) {
+                Text("${(ahorrado * 100 / meta).coerceAtMost(100)} %", fontWeight = FontWeight.Black, fontSize = 18.sp, color = TealOscuro)
+            }
+        }
+        if (meta > 0L) {
+            Spacer(Modifier.height(10.dp))
+            BarraProgreso(ahorrado.toFloat() / meta, TealOscuro, fondo = Color.White)
+        }
     }
 }

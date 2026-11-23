@@ -1,457 +1,246 @@
 package com.example.proyecto_integrador_moviles_g7.presentation.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
-import androidx.compose.material.icons.automirrored.outlined.Sort
-import androidx.compose.material.icons.outlined.AddCircle
-import androidx.compose.material.icons.outlined.Calculate
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.PieChart
-import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
 import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
-import com.example.proyecto_integrador_moviles_g7.data.repository.InMemoryFinanzasRepository
-import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraSuperior
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraContextual
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraProgreso
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BotonPrimario
+import com.example.proyecto_integrador_moviles_g7.presentation.components.CajaIcono
+import com.example.proyecto_integrador_moviles_g7.presentation.components.CargandoPantalla
+import com.example.proyecto_integrador_moviles_g7.presentation.components.EstadoVacio
 import com.example.proyecto_integrador_moviles_g7.presentation.components.FilaMovimiento
-import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
+import com.example.proyecto_integrador_moviles_g7.presentation.components.TarjetaG7
+import com.example.proyecto_integrador_moviles_g7.presentation.components.TituloSeccion
+import com.example.proyecto_integrador_moviles_g7.presentation.components.colorUsoPresupuesto
 import com.example.proyecto_integrador_moviles_g7.presentation.components.formatoCop
+import com.example.proyecto_integrador_moviles_g7.presentation.components.iconoCategoria
+import com.example.proyecto_integrador_moviles_g7.presentation.components.nombreMes
 import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.DetalleCategoriaViewModel
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar800
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar900
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Crema
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda300
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda400
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda600
 import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Proyectointegradormovilesg7Theme
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa400
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa600
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate200
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate400
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate500
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate600
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate800
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate900
 import com.example.proyecto_integrador_moviles_g7.ui.theme.TealMedio
 import com.example.proyecto_integrador_moviles_g7.ui.theme.TealOscuro
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Turquesa
-import java.time.LocalDate
-import java.util.Locale
+import java.time.YearMonth
 
+/** Pantalla 12 — Detalle de categoría. */
 @Composable
 fun DetalleCategoriaScreen(
     viewModel: DetalleCategoriaViewModel,
-    onAtras: () -> Unit
+    categorias: List<Categoria>,
+    onAtras: () -> Unit,
+    onRegistrar: (TipoMovimiento, Int) -> Unit
 ) {
-    var registrar by rememberSaveable { mutableStateOf(false) }
-    var editarCategoria by rememberSaveable { mutableStateOf(false) }
-    var eliminarCategoria by rememberSaveable { mutableStateOf(false) }
-    var menuAbierto by rememberSaveable { mutableStateOf(false) }
-    var editandoId by rememberSaveable { mutableStateOf<String?>(null) }
+    val estado by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val categoria = uiState.categoria
+    var soloEsteMes by rememberSaveable { mutableStateOf(true) }
+    var editandoId by remember { mutableStateOf<String?>(null) }
+    var editarCategoria by remember { mutableStateOf(false) }
+    var eliminarCategoria by remember { mutableStateOf(false) }
+
+    val categoria = estado.categoria
     if (categoria == null) {
-        Column(Modifier.fillMaxSize().background(FondoClaro)) {
-            BarraSuperior(titulo = "Categoría", onAtras = onAtras)
-            Text(
-                "Categoría no encontrada",
-                modifier = Modifier.fillMaxWidth().padding(24.dp),
-                textAlign = TextAlign.Center,
-                color = Slate500
-            )
+        Scaffold(containerColor = FondoClaro, topBar = { BarraContextual("Categoría", onAtras) }) { relleno ->
+            if (categorias.isEmpty()) CargandoPantalla(Modifier.padding(relleno))
+            else EstadoVacio(Icons.Outlined.ReceiptLong, "Categoría no encontrada", "Es posible que se haya eliminado.", Modifier.padding(relleno))
         }
         return
     }
-    if (registrar) {
-        DialogoMovimiento(categoria.tipo, listOf(categoria),
-            onCerrar = { registrar = false },
-            onGuardar = { descripcion, monto, _ ->
-                viewModel.agregarMovimiento(descripcion, monto).also { if (it == null) registrar = false }
-            })
-    }
-    editandoId?.let { id -> uiState.movimientos.firstOrNull { it.id == id } }?.let { movimiento ->
-        DialogoMovimiento(
-            tipo = movimiento.tipo,
-            categorias = listOf(categoria),
-            inicial = movimiento,
-            onCerrar = { editandoId = null },
-            onGuardar = { descripcion, monto, categoriaId ->
-                viewModel.actualizarMovimiento(movimiento.id, descripcion, monto, categoriaId)
-                    .also { if (it == null) editandoId = null }
-            }
-        )
-    }
-    if (editarCategoria) {
-        DialogoCategoria(
-            inicial = categoria,
-            onCerrar = { editarCategoria = false },
-            onGuardar = { nombre, _, presupuesto ->
-                viewModel.actualizarCategoria(nombre, presupuesto).also { if (it) editarCategoria = false }
-            }
-        )
-    }
-    if (eliminarCategoria) {
-        DialogoEliminarCategoria(
-            categoria = categoria,
-            tieneMovimientos = uiState.movimientos.isNotEmpty(),
-            onCerrar = { eliminarCategoria = false },
-            onConfirmar = {
-                eliminarCategoria = false
-                if (viewModel.eliminarCategoria()) onAtras()
-            }
-        )
-    }
-    val movimientos = uiState.movimientos
-    val estilo = estiloCategoria(categoria.nombre)
+
     val esGasto = categoria.tipo == TipoMovimiento.GASTO
+    val mesActual = YearMonth.now()
+    val delMes = estado.movimientos.filter { YearMonth.from(it.fecha) == mesActual }
+    val totalMes = delMes.sumOf { it.monto }
+    val visibles = if (soloEsteMes) delMes else estado.movimientos
+    val totalVisibles = visibles.sumOf { it.monto }
+    val promedio = if (visibles.isEmpty()) 0L else totalVisibles / visibles.size
+    // Participación sobre el total del mismo tipo en el período visible
+    val totalDelTipo = viewModel.totalDelTipo(categoria.tipo, if (soloEsteMes) mesActual else null)
+    val participacion = if (totalDelTipo > 0L) totalVisibles * 100f / totalDelTipo else 0f
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(FondoClaro)
-    ) {
-        BarraSuperior(titulo = categoria.nombre, onAtras = onAtras) {
-            IconButton(onClick = { editarCategoria = true }) {
-                Icon(Icons.Outlined.Edit, contentDescription = "Editar categoría", tint = Slate600)
-            }
-            Box {
-                IconButton(onClick = { menuAbierto = true }) {
-                    Icon(Icons.Outlined.MoreVert, contentDescription = "Más opciones", tint = Slate600)
+    Scaffold(
+        containerColor = FondoClaro,
+        topBar = {
+            BarraContextual(categoria.nombre, onAtras) {
+                IconButton(onClick = { editarCategoria = true }) {
+                    Icon(Icons.Outlined.Edit, contentDescription = "Editar categoría", tint = TealMedio)
                 }
-                DropdownMenu(expanded = menuAbierto, onDismissRequest = { menuAbierto = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Eliminar categoría", color = Rosa600) },
-                        leadingIcon = { Icon(Icons.Outlined.DeleteOutline, null, tint = Rosa600) },
-                        onClick = {
-                            menuAbierto = false
-                            eliminarCategoria = true
-                        }
-                    )
+                IconButton(onClick = { eliminarCategoria = true }) {
+                    Icon(Icons.Outlined.DeleteOutline, contentDescription = "Eliminar categoría", tint = Rosa600)
                 }
             }
-        }
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(categoria.nombre, fontSize = 20.sp, fontWeight = FontWeight.Black, color = Slate900)
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        "ACTIVA",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = TealOscuro,
-                        modifier = Modifier
-                            .background(Turquesa.copy(alpha = 0.4f), RoundedCornerShape(50))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
-                }
-                Text("Detalle de Categoría • ${if (esGasto) "Gastos" else "Ingresos"}", fontSize = 12.sp, color = Slate500, modifier = Modifier.padding(top = 2.dp))
-            }
-
-            TarjetaPresupuesto(categoria, uiState.gastoCategoria)
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Metrica(Modifier.weight(1f), Icons.Outlined.Calculate, "Promedio/gasto", formatoCop(uiState.promedio))
-                Metrica(Modifier.weight(1f), Icons.AutoMirrored.Outlined.ReceiptLong, "Movimientos", "${movimientos.size} compras")
-                Metrica(
-                    Modifier.weight(1f),
-                    Icons.Outlined.PieChart,
-                    "% del total",
-                    String.format(Locale.forLanguageTag("es-CO"), "%.1f%%", uiState.porcentajeDelTotal),
-                    fondo = Crema,
-                    colorIcono = Ambar800,
-                    colorTitulo = Ambar800.copy(alpha = 0.8f),
-                    colorValor = Ambar900
+        },
+        bottomBar = {
+            Surface(color = Color.White, shadowElevation = 8.dp) {
+                BotonPrimario(
+                    texto = "Registrar ${if (esGasto) "gasto" else "ingreso"} en ${categoria.nombre}",
+                    icono = Icons.Outlined.Add,
+                    fondo = if (esGasto) TealOscuro else Esmeralda600,
+                    onClick = { onRegistrar(categoria.tipo, categoria.id) },
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 )
             }
-
-            SelectorPeriodo()
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        "Transacciones en ${categoria.nombre}",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Slate800,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Icon(Icons.AutoMirrored.Outlined.Sort, null, tint = TealMedio, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(2.dp))
-                    Text("Por fecha", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = TealMedio)
-                }
-                if (movimientos.isEmpty()) {
-                    Text(
-                        "No hay transacciones en este período",
-                        fontSize = 12.sp,
-                        color = Slate400,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(24.dp)
-                    )
-                }
-                movimientos.forEach { movimiento ->
-                    FilaMovimiento(
-                        icono = estilo.icono,
-                        fondoIcono = estilo.fondoIcono,
-                        colorIcono = estilo.color,
-                        titulo = movimiento.descripcion,
-                        detalle = detalleMovimiento(movimiento, categoria.nombre),
-                        monto = movimiento.montoConSigno,
-                        colorMonto = if (esGasto) Rosa600 else Esmeralda600,
-                        onEditar = { editandoId = movimiento.id },
-                        onEliminar = {
-                            viewModel.eliminarMovimiento(movimiento.id)?.let { mensaje ->
-                                Toast.makeText(context, mensaje, Toast.LENGTH_LONG).show()
+        }
+    ) { relleno ->
+        LazyColumn(
+            Modifier
+                .fillMaxSize()
+                .padding(relleno),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Surface(color = TealOscuro, shape = RoundedCornerShape(24.dp), shadowElevation = 4.dp) {
+                    Column(Modifier.fillMaxWidth().padding(20.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CajaIcono(iconoCategoria(categoria.nombre, categoria.tipo), fondo = Turquesa, tinte = TealOscuro)
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    if (esGasto) "CONSUMO DE ${nombreMes(mesActual).uppercase()}" else "INGRESOS DE ${nombreMes(mesActual).uppercase()}",
+                                    fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Turquesa
+                                )
+                                Text(formatoCop(totalMes) + " COP", fontSize = 26.sp, fontWeight = FontWeight.Black, color = Color.White)
                             }
                         }
+                        if (esGasto && categoria.presupuesto > 0L) {
+                            val porcentaje = totalMes * 100f / categoria.presupuesto
+                            Spacer(Modifier.height(16.dp))
+                            BarraProgreso(porcentaje / 100f, if (porcentaje >= 80f) colorUsoPresupuesto(porcentaje) else Turquesa, alto = 10.dp, fondo = Color.White.copy(alpha = 0.15f))
+                            Spacer(Modifier.height(8.dp))
+                            Row {
+                                Text("${porcentaje.toInt()} % de ${formatoCop(categoria.presupuesto)}", fontSize = 12.sp, color = AguaClaro, modifier = Modifier.weight(1f))
+                                val restante = categoria.presupuesto - totalMes
+                                Text(
+                                    if (restante >= 0) "Quedan ${formatoCop(restante)}" else "Excedido ${formatoCop(-restante)}",
+                                    fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                                    color = if (restante >= 0) Color.White else Color(0xFFFDA4AF)
+                                )
+                            }
+                        } else if (esGasto) {
+                            Spacer(Modifier.height(10.dp))
+                            Text("Sin presupuesto mensual. Asígnalo con el lápiz de arriba.", fontSize = 12.sp, color = AguaClaro)
+                        }
+                    }
+                }
+            }
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MicroMetrica("Promedio", formatoCop(promedio), Modifier.weight(1f))
+                    MicroMetrica("Movimientos", "${visibles.size}", Modifier.weight(1f))
+                    MicroMetrica("% del total", "${participacion.toInt()} %", Modifier.weight(1f))
+                }
+            }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) { TituloSeccion("Historial") }
+                    ChipFiltro("Este mes", soloEsteMes) { soloEsteMes = true }
+                    Spacer(Modifier.width(6.dp))
+                    ChipFiltro("Todo", !soloEsteMes) { soloEsteMes = false }
+                }
+            }
+            if (visibles.isEmpty()) {
+                item {
+                    EstadoVacio(
+                        Icons.Outlined.ReceiptLong,
+                        "Sin movimientos",
+                        if (soloEsteMes) "No hay movimientos en esta categoría este mes." else "Esta categoría todavía no tiene movimientos."
                     )
                 }
             }
-        }
-
-        Column(
-            modifier = Modifier
-                .navigationBarsPadding()
-                .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                onClick = { registrar = true },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Turquesa, contentColor = TealOscuro)
-            ) {
-                Icon(Icons.Outlined.AddCircle, null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    "Registrar ${if (esGasto) "gasto" else "ingreso"} en ${categoria.nombre}",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            items(visibles, key = { it.id }) { movimiento ->
+                FilaMovimiento(movimiento, categoria.nombre) { editandoId = movimiento.id }
             }
-            if (esGasto) {
-                TextButton(onClick = { editarCategoria = true }) {
-                    Text("Ajustar presupuesto mensual", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TealMedio)
+        }
+    }
+
+    estado.movimientos.firstOrNull { it.id == editandoId }?.let { movimiento ->
+        HojaEditarMovimiento(
+            movimiento = movimiento,
+            categorias = categorias,
+            onCerrar = { editandoId = null },
+            onGuardar = { d, m, c -> viewModel.actualizarMovimiento(movimiento.id, d, m, c) },
+            onEliminar = {
+                viewModel.eliminarMovimiento(movimiento.id).also { msg ->
+                    if (msg != null) Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun TarjetaPresupuesto(categoria: Categoria, gastado: Long) {
-    val estilo = estiloCategoria(categoria.nombre)
-    val avance = if (categoria.presupuesto == 0L) 0f else {
-        (gastado.toFloat() / categoria.presupuesto).coerceIn(0f, 1f)
-    }
-    val restante = categoria.presupuesto - gastado
-    val saludable = avance < 0.8f
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(TealOscuro, RoundedCornerShape(24.dp))
-            .padding(20.dp)
-    ) {
-        Row(verticalAlignment = Alignment.Top) {
-            Column(Modifier.weight(1f)) {
-                Text("Consumo Mensual", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = AguaClaro.copy(alpha = 0.8f))
-                Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(top = 4.dp)) {
-                    Text(formatoCop(gastado), fontSize = 30.sp, fontWeight = FontWeight.Black, color = Color.White)
-                    Spacer(Modifier.width(8.dp))
-                    Text("COP", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Turquesa, modifier = Modifier.padding(bottom = 6.dp))
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Turquesa, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(estilo.icono, null, tint = TealOscuro, modifier = Modifier.size(26.dp))
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.1f)))
-        Spacer(Modifier.height(12.dp))
-
-        Row(Modifier.fillMaxWidth()) {
-            Text("Presupuesto: ${formatoCop(categoria.presupuesto)} COP", fontSize = 12.sp, color = AguaClaro, modifier = Modifier.weight(1f))
-            Text("${(avance * 100).toInt()}% consumido", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Turquesa)
-        }
-        Spacer(Modifier.height(6.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color.White.copy(alpha = 0.2f))
-        ) {
-            Box(
-                Modifier
-                    .fillMaxWidth(avance)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(50))
-                    .background(if (saludable) Turquesa else Rosa400)
-            )
-        }
-        Spacer(Modifier.height(10.dp))
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                if (saludable) Icons.Outlined.CheckCircle else Icons.Outlined.Warning,
-                null,
-                tint = if (saludable) Esmeralda300 else Rosa400,
-                modifier = Modifier.size(12.dp)
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(
-                "${formatoCop(restante)} COP restantes",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = if (saludable) Esmeralda300 else Rosa400,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                if (saludable) "En límite saludable" else "Cerca del límite",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (saludable) Esmeralda300 else Rosa400,
-                modifier = Modifier
-                    .background((if (saludable) Esmeralda400 else Rosa400).copy(alpha = 0.2f), RoundedCornerShape(50))
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun Metrica(
-    modifier: Modifier,
-    icono: ImageVector,
-    titulo: String,
-    valor: String,
-    fondo: Color = Color.White,
-    colorIcono: Color = TealMedio,
-    colorTitulo: Color = Slate400,
-    colorValor: Color = Slate800
-) {
-    Tarjeta(modifier = modifier, radio = 16.dp, fondo = fondo, borde = if (fondo == Color.White) Slate200.copy(alpha = 0.5f) else fondo, espaciado = 4.dp) {
-        Icon(icono, null, tint = colorIcono, modifier = Modifier.size(18.dp))
-        Text(titulo, fontSize = 10.sp, fontWeight = FontWeight.Medium, color = colorTitulo)
-        Text(valor, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = colorValor)
-    }
-}
-
-@Composable
-private fun SelectorPeriodo() {
-    val hoy = LocalDate.now()
-    val periodos = listOf(periodoActual(hoy), periodoActual(hoy.minusMonths(1)), "Últimos 3 meses")
-    var seleccionado by rememberSaveable { mutableIntStateOf(0) }
-
-    Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        periodos.forEachIndexed { indice, periodo ->
-            val activo = indice == seleccionado
-            FilterChip(
-                selected = activo,
-                onClick = { seleccionado = indice },
-                label = { Text(periodo, fontSize = 12.sp, fontWeight = if (activo) FontWeight.Bold else FontWeight.Medium) },
-                leadingIcon = if (activo) {
-                    { Icon(Icons.Outlined.Check, null, modifier = Modifier.size(14.dp)) }
-                } else null,
-                shape = RoundedCornerShape(50),
-                colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Color.White,
-                    labelColor = Slate600,
-                    selectedContainerColor = Turquesa,
-                    selectedLabelColor = TealOscuro,
-                    selectedLeadingIconColor = TealOscuro
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = activo,
-                    borderColor = Slate200,
-                    selectedBorderColor = Turquesa
-                )
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, heightDp = 1100)
-@Composable
-private fun DetalleCategoriaScreenPreview() {
-    val previewViewModel: DetalleCategoriaViewModel = viewModel(
-        factory = DetalleCategoriaViewModel.factory(2, InMemoryFinanzasRepository())
-    )
-    Proyectointegradormovilesg7Theme {
-        DetalleCategoriaScreen(
-            viewModel = previewViewModel,
-            onAtras = {}
         )
+    }
+
+    if (editarCategoria) {
+        HojaCategoria(
+            categoria = categoria,
+            tipoInicial = categoria.tipo,
+            existentes = categorias,
+            onCerrar = { editarCategoria = false },
+            onGuardar = { nombre, _, presupuesto -> viewModel.actualizarCategoria(nombre, presupuesto) }
+        )
+    }
+
+    if (eliminarCategoria) {
+        ConfirmarEliminarCategoria(
+            categoria = categoria,
+            movimientos = estado.movimientos.size,
+            onEliminar = {
+                viewModel.eliminarCategoria().also { if (it) onAtras() }
+            },
+            onCerrar = { eliminarCategoria = false }
+        )
+    }
+}
+
+@Composable
+private fun MicroMetrica(titulo: String, valor: String, modifier: Modifier) {
+    TarjetaG7(modifier = modifier, radio = 16.dp, relleno = PaddingValues(12.dp)) {
+        Text(titulo, fontSize = 11.sp, color = Slate500, maxLines = 1)
+        Spacer(Modifier.height(4.dp))
+        Text(valor, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Slate900, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

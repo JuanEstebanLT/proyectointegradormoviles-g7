@@ -1,33 +1,19 @@
 package com.example.proyecto_integrador_moviles_g7.presentation.screens
 
-import androidx.compose.foundation.background
+import android.util.Patterns
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.AlternateEmail
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,26 +23,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.proyecto_integrador_moviles_g7.presentation.components.Tarjeta
+import com.example.proyecto_integrador_moviles_g7.presentation.components.AvisoError
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BarraProgreso
+import com.example.proyecto_integrador_moviles_g7.presentation.components.BotonPrimario
 import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.AuthViewModel
-import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa50
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar500
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda600
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Rosa600
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate500
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate700
-import com.example.proyecto_integrador_moviles_g7.ui.theme.Slate800
 import com.example.proyecto_integrador_moviles_g7.ui.theme.TealOscuro
 
-/** Crea la cuenta en la API (HU-01) y continúa al Saldo Inicial. */
 @Composable
 fun RegistroScreen(
     viewModel: AuthViewModel,
@@ -68,94 +51,93 @@ fun RegistroScreen(
     var correo by rememberSaveable { mutableStateOf("") }
     var telefono by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
+    var confirmacion by rememberSaveable { mutableStateOf("") }
+    // Los errores de cada campo se muestran después del primer intento
+    var intentado by rememberSaveable { mutableStateOf(false) }
+    val foco = LocalFocusManager.current
 
     LaunchedEffect(estado.usuario) {
         if (estado.usuario != null) onRegistrado()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(FondoClaro)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    val errorNombre = if (intentado && nombre.isBlank()) "Ingresa tu nombre completo" else null
+    val errorCorreo = if (intentado && !Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches()) "Correo no válido" else null
+    val errorTelefono = if (intentado && telefono.length > 20) "Máximo 20 caracteres" else null
+    val errorContrasena = if (intentado && contrasena.length < 6) "Mínimo 6 caracteres" else null
+    val errorConfirmacion = if (intentado && confirmacion != contrasena) "Las contraseñas no coinciden" else null
+
+    val crear = {
+        foco.clearFocus()
+        intentado = true
+        val valido = nombre.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches() &&
+            telefono.length <= 20 && contrasena.length >= 6 && confirmacion == contrasena
+        if (valido) viewModel.registrar(nombre, correo, telefono, contrasena)
+    }
+    val limpiar = { viewModel.limpiarError() }
+
+    PantallaAutenticacion(
+        titulo = "Crea tu cuenta",
+        subtitulo = "Empieza a organizar tus ingresos y gastos en menos de un minuto.",
+        onAtras = onAtras
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onAtras) {
-                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Volver", tint = TealOscuro)
-            }
-            Text("Crear cuenta", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Slate800)
-        }
-        Text(
-            "Regístrate para guardar tus movimientos de forma segura. Luego definirás tu saldo inicial.",
-            fontSize = 12.sp,
-            color = Slate500
+        CampoAutenticacion(nombre, { nombre = it; limpiar() }, "Nombre completo", Icons.Outlined.Person, error = errorNombre)
+        Spacer(Modifier.height(8.dp))
+        CampoAutenticacion(
+            correo, { correo = it; limpiar() }, "Correo electrónico", Icons.Outlined.Mail,
+            tipoTeclado = KeyboardType.Email, error = errorCorreo
         )
-
-        Tarjeta(espaciado = 14.dp) {
-            Campo("Nombre completo", nombre, { nombre = it; viewModel.limpiarError() },
-                Icons.Outlined.Person, "Tu nombre", KeyboardType.Text)
-            Campo("Correo electrónico", correo, { correo = it; viewModel.limpiarError() },
-                Icons.Outlined.AlternateEmail, "ejemplo@correo.com", KeyboardType.Email)
-            Campo("Teléfono (opcional)", telefono, { telefono = it; viewModel.limpiarError() },
-                Icons.Outlined.Phone, "3001234567", KeyboardType.Phone)
-            Campo("Contraseña", contrasena, { contrasena = it; viewModel.limpiarError() },
-                Icons.Outlined.Lock, "Mínimo 6 caracteres", KeyboardType.Password, ocultar = true)
-
-            estado.error?.let { error ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Rosa50, RoundedCornerShape(12.dp))
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Outlined.ErrorOutline, null, tint = Rosa600, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(10.dp))
-                    Text(error, fontSize = 12.sp, color = Rosa600)
-                }
-            }
-
-            Button(
-                onClick = { viewModel.registrar(nombre, correo, telefono, contrasena) },
-                enabled = !estado.cargando,
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = TealOscuro)
-            ) {
-                if (estado.cargando) {
-                    CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
-                } else {
-                    Text("Crear cuenta", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
+        Spacer(Modifier.height(8.dp))
+        CampoAutenticacion(
+            telefono, { telefono = it.filter { c -> c.isDigit() || c == ' ' }; limpiar() },
+            "Teléfono (opcional)", Icons.Outlined.Phone,
+            tipoTeclado = KeyboardType.Phone, error = errorTelefono, prefijo = "+57 "
+        )
+        Spacer(Modifier.height(8.dp))
+        CampoContrasena(
+            contrasena, { contrasena = it; limpiar() }, "Contraseña",
+            accion = ImeAction.Next, onAccion = { foco.moveFocus(androidx.compose.ui.focus.FocusDirection.Down) },
+            error = errorContrasena
+        )
+        if (contrasena.isNotEmpty()) MedidorSeguridad(contrasena)
+        Spacer(Modifier.height(8.dp))
+        CampoContrasena(
+            confirmacion, { confirmacion = it; limpiar() }, "Confirmar contraseña",
+            onAccion = { crear() }, error = errorConfirmacion
+        )
+        estado.error?.let {
+            Spacer(Modifier.height(8.dp))
+            AvisoError(it)
+        }
+        Spacer(Modifier.height(16.dp))
+        BotonPrimario("Crear cuenta", onClick = crear, icono = Icons.Outlined.PersonAdd, cargando = estado.cargando)
+        Spacer(Modifier.height(12.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text("¿Ya tienes cuenta? ", color = Slate500, fontSize = 14.sp)
+            Text(
+                "Inicia sesión", color = TealOscuro, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
+                modifier = Modifier
+                    .clickable(onClick = onAtras)
+                    .padding(vertical = 6.dp)
+            )
         }
     }
 }
 
 @Composable
-private fun Campo(
-    etiqueta: String,
-    valor: String,
-    onCambio: (String) -> Unit,
-    icono: ImageVector,
-    placeholder: String,
-    tipoTeclado: KeyboardType,
-    ocultar: Boolean = false
-) {
-    Column {
-        Text(etiqueta, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Slate700)
-        Spacer(Modifier.height(6.dp))
-        CampoTexto(
-            valor = valor,
-            onCambio = onCambio,
-            icono = icono,
-            placeholder = placeholder,
-            tipoTeclado = tipoTeclado,
-            transformacion = if (ocultar) PasswordVisualTransformation() else VisualTransformation.None
-        )
+private fun MedidorSeguridad(contrasena: String) {
+    var puntos = 0
+    if (contrasena.length >= 8) puntos++
+    if (contrasena.any { it.isUpperCase() } && contrasena.any { it.isLowerCase() }) puntos++
+    if (contrasena.any { it.isDigit() }) puntos++
+    if (contrasena.any { !it.isLetterOrDigit() }) puntos++
+    val (texto, color) = when {
+        contrasena.length < 6 || puntos <= 1 -> "Débil" to Rosa600
+        puntos <= 2 -> "Media" to Ambar500
+        else -> "Fuerte" to Esmeralda600
+    }
+    Row(Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        BarraProgreso((puntos.coerceAtLeast(1)) / 4f, color, modifier = Modifier.weight(1f), alto = 6.dp)
+        Spacer(Modifier.width(10.dp))
+        Text("Seguridad: $texto", color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }

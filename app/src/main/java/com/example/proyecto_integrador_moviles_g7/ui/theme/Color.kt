@@ -36,3 +36,7 @@ val Ambar800 = Color(0xFF92400E)
 val Ambar700 = Color(0xFFB45309)
 val Ambar500 = Color(0xFFF59E0B)
 val Ambar50 = Color(0xFFFFFBEB)
+
+// Superficies del sistema de diseño de Stitch (Finanzas G7)
+val HieloSuave = Color(0xFFE1F7FE)
+val SuperficieAtenuada = Color(0xFFC8DEE4)
