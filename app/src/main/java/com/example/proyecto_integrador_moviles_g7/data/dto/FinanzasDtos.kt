@@ -10,7 +10,8 @@ data class UsuarioDto(
     val correo: String,
     val telefono: String?,
     @Json(name = "saldo_inicial") val saldoInicial: Double,
-    val rol: String = "USUARIO"
+    val rol: String = "USUARIO",
+    @Json(name = "creado_en") val creadoEn: String? = null
 )
 
 data class SesionDto(
@@ -83,4 +84,32 @@ data class ActualizarCategoriaDto(
 
 data class ErrorDto(
     val error: String
+)
+
+/** PUT /usuarios/:id con los datos del perfil (el correo no se puede cambiar). */
+data class ActualizarPerfilDto(
+    val nombre: String,
+    val telefono: String
+)
+
+data class ConfiguracionDto(
+    @Json(name = "meta_ahorro_mensual") val metaAhorroMensual: Double = 0.0,
+    @Json(name = "notificaciones_activas") val notificacionesActivas: Boolean = true
+)
+
+data class ActualizarConfiguracionDto(
+    @Json(name = "meta_ahorro_mensual") val metaAhorroMensual: Double
+)
+
+data class CategoriaSugerenciaDto(
+    val id: Long,
+    val nombre: String
+)
+
+data class SugerenciaDto(
+    val id: Long,
+    val titulo: String,
+    val mensaje: String,
+    val prioridad: Int = 0,
+    val categorias: List<CategoriaSugerenciaDto> = emptyList()
 )

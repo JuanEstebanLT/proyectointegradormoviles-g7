@@ -66,7 +66,17 @@ class ApiFinanzasRepository(
         )
     }
 
-    fun recargar() = ejecutar(alFallar = {}) { cargar() }
+    private val _cargando = MutableStateFlow(false)
+    /** true mientras se descargan los datos de la sesión. */
+    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
+
+    fun recargar() {
+        _cargando.value = true
+        ejecutar(alFallar = { _cargando.value = false }) {
+            cargar()
+            _cargando.value = false
+        }
+    }
 
     fun limpiar() {
         _state.value = FinanzasState()

@@ -8,14 +8,17 @@ import com.example.proyecto_integrador_moviles_g7.data.model.Movimiento
 import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
 import com.example.proyecto_integrador_moviles_g7.data.model.Usuario
 import com.example.proyecto_integrador_moviles_g7.data.network.SesionActual
-import com.example.proyecto_integrador_moviles_g7.data.repository.aModelo
+import com.example.proyecto_integrador_moviles_g7.data.repository.CuentaRepository
 import com.example.proyecto_integrador_moviles_g7.data.repository.FinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.data.repository.FinanzasState
+import com.example.proyecto_integrador_moviles_g7.data.repository.aModelo
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 data class GastoCategoria(
     val categoria: Categoria,
@@ -30,15 +33,23 @@ data class DashboardUiState(
     val movimientosRecientes: List<Movimiento> = emptyList(),
     val movimientos: List<Movimiento> = emptyList(),
     val gastosPorCategoria: List<GastoCategoria> = emptyList(),
-    val categorias: List<Categoria> = emptyList()
+    val categorias: List<Categoria> = emptyList(),
+    /** Resumen del mes en curso (ingresos, gastos, ahorro y uso de presupuestos). */
+    val mesActual: ResumenMes = ResumenMes(YearMonth.now(), 0L, 0L, emptyList(), emptyList()),
+    val metaAhorro: Long = 0L,
+    val notificacionesSinLeer: Int = 0
 )
 
 class DashboardViewModel(
-    private val repository: FinanzasRepository
+    private val repository: FinanzasRepository,
+    private val cuenta: CuentaRepository? = null
 ) : ViewModel() {
 
-    val uiState: StateFlow<DashboardUiState> = repository.state
-        .map(::crearUiState)
+    val uiState: StateFlow<DashboardUiState> = combine(
+        repository.state,
+        cuenta?.metaAhorro ?: MutableStateFlow(0L),
+        cuenta?.notificacionesLeidas ?: MutableStateFlow(emptySet())
+    ) { state, meta, leidas -> crearUiState(state, meta, leidas) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, crearUiState(repository.state.value))
 
     /** Devuelve null si se registró, o el mensaje que explica por qué no (por ejemplo, saldo insuficiente). */
@@ -70,13 +81,17 @@ class DashboardViewModel(
 
     /** Usuario autenticado en la API, o null si no hay sesión. */
     val usuario: Usuario?
-        get() = SesionActual.usuario?.aModelo()
+        get() = cuenta?.usuario?.value ?: SesionActual.usuario?.aModelo()
 
     companion object {
-        fun factory(repository: FinanzasRepository): ViewModelProvider.Factory =
-            simpleViewModelFactory { DashboardViewModel(repository) }
+        fun factory(repository: FinanzasRepository, cuenta: CuentaRepository? = null): ViewModelProvider.Factory =
+            simpleViewModelFactory { DashboardViewModel(repository, cuenta) }
 
-        fun crearUiState(state: FinanzasState): DashboardUiState {
+        fun crearUiState(
+            state: FinanzasState,
+            metaAhorro: Long = 0L,
+            notificacionesLeidas: Set<String> = emptySet()
+        ): DashboardUiState {
             val ingresos = state.movimientos
                 .filter { it.tipo == TipoMovimiento.INGRESO }
                 .sumOf { it.monto }
@@ -93,6 +108,7 @@ class DashboardViewModel(
                             .sumOf { it.monto }
                     )
                 }
+            val notificaciones = AnalisisFinanciero.notificaciones(state, metaAhorro)
 
             return DashboardUiState(
                 saldoInicial = state.saldoInicial,
@@ -102,7 +118,10 @@ class DashboardViewModel(
                 movimientosRecientes = state.movimientos.sortedByDescending { it.fecha }.take(5),
                 movimientos = state.movimientos.sortedByDescending { it.fecha },
                 gastosPorCategoria = gastosPorCategoria,
-                categorias = state.categorias
+                categorias = state.categorias,
+                mesActual = AnalisisFinanciero.resumenMes(state, YearMonth.now()),
+                metaAhorro = metaAhorro,
+                notificacionesSinLeer = notificaciones.count { it.clave !in notificacionesLeidas }
             )
         }
     }
