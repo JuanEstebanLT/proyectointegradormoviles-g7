@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.Savings
@@ -66,8 +67,13 @@ import com.example.proyecto_integrador_moviles_g7.presentation.components.colorU
 import com.example.proyecto_integrador_moviles_g7.presentation.components.formatoCop
 import com.example.proyecto_integrador_moviles_g7.presentation.components.iconoCategoria
 import com.example.proyecto_integrador_moviles_g7.presentation.components.nombreMes
+import com.example.proyecto_integrador_moviles_g7.presentation.components.etiquetaDia
+import com.example.proyecto_integrador_moviles_g7.presentation.components.hora
 import com.example.proyecto_integrador_moviles_g7.presentation.viewmodel.DashboardViewModel
 import com.example.proyecto_integrador_moviles_g7.ui.theme.AguaClaro
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar50
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar500
+import com.example.proyecto_integrador_moviles_g7.ui.theme.Ambar800
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda50
 import com.example.proyecto_integrador_moviles_g7.ui.theme.Esmeralda600
 import com.example.proyecto_integrador_moviles_g7.ui.theme.FondoClaro
@@ -89,6 +95,9 @@ internal val paletaCategorias = listOf(
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     cargando: Boolean,
+    sinConexion: Boolean,
+    ultimaSincronizacion: Long?,
+    onReintentar: () -> Unit,
     onSeccion: (SeccionPrincipal) -> Unit,
     onPerfil: () -> Unit,
     onNotificaciones: () -> Unit,
@@ -124,6 +133,10 @@ fun DashboardScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (sinConexion) {
+                item { AvisoSinConexion(ultimaSincronizacion, cargando, onReintentar) }
+            }
+
             item { TarjetaSaldo(estado.saldoDisponible, mes.ingresos, mes.gastos, nombreMes(mes.mes), cargando) }
 
             item {
@@ -325,6 +338,35 @@ private fun TarjetaMetaAhorro(meta: Long, ahorrado: Long, onClick: () -> Unit) {
         if (meta > 0L) {
             Spacer(Modifier.height(10.dp))
             BarraProgreso(ahorrado.toFloat() / meta, TealOscuro, fondo = Color.White)
+        }
+    }
+}
+
+/** Se muestra cuando la API no responde: los datos vienen de la copia guardada en el teléfono. */
+@Composable
+private fun AvisoSinConexion(ultimaSincronizacion: Long?, cargando: Boolean, onReintentar: () -> Unit) {
+    val cuando = ultimaSincronizacion?.let {
+        java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+    }
+    TarjetaG7(fondo = Ambar50, borde = Ambar500.copy(alpha = 0.4f), relleno = PaddingValues(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.CloudOff, contentDescription = null, tint = Ambar800, modifier = Modifier.size(22.dp))
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Sin conexión", fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, color = Ambar800)
+                Text(
+                    if (cuando != null) "Datos guardados del ${etiquetaDia(cuando.toLocalDate()).lowercase()} a las ${hora(cuando)}. Puedes consultarlos, pero los cambios necesitan internet."
+                    else "Los cambios necesitan internet.",
+                    fontSize = 12.sp, color = Ambar800, lineHeight = 16.sp
+                )
+            }
+            if (cargando) {
+                CircularProgressIndicator(color = Ambar800, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
+            } else {
+                androidx.compose.material3.TextButton(onClick = onReintentar) {
+                    Text("Reintentar", color = TealOscuro, fontWeight = FontWeight.Bold)
+                }
+            }
         }
     }
 }

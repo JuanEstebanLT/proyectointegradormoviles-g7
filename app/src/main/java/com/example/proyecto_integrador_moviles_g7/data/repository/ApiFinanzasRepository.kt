@@ -8,6 +8,9 @@ import com.example.proyecto_integrador_moviles_g7.data.dto.CategoriaDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.CrearCategoriaDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.CrearMovimientoDto
 import com.example.proyecto_integrador_moviles_g7.data.dto.MovimientoDto
+import com.example.proyecto_integrador_moviles_g7.data.local.CacheFinanzas
+import com.example.proyecto_integrador_moviles_g7.data.local.ProveedorLocal
+import java.io.IOException
 import com.example.proyecto_integrador_moviles_g7.data.model.Categoria
 import com.example.proyecto_integrador_moviles_g7.data.model.Movimiento
 import com.example.proyecto_integrador_moviles_g7.data.model.TipoMovimiento
@@ -42,7 +45,9 @@ import kotlin.math.roundToLong
  */
 class ApiFinanzasRepository(
     private val scope: CoroutineScope,
-    private val api: FinanzasApiService = ClienteApi.servicio
+    private val api: FinanzasApiService = ClienteApi.servicio,
+    /** Copia local en Room (null en tests o si no se inició el almacenamiento). */
+    private val cache: CacheFinanzas? = ProveedorLocal.cache
 ) : FinanzasRepository {
 
     private val _state = MutableStateFlow(FinanzasState())
@@ -51,9 +56,33 @@ class ApiFinanzasRepository(
     private val _errores = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val errores: SharedFlow<String> = _errores.asSharedFlow()
 
-    /** Descarga usuario, categorías y movimientos del usuario autenticado. */
+    private val _cargando = MutableStateFlow(false)
+    /** true mientras se descargan los datos de la sesión. */
+    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
+
+    private val _sinConexion = MutableStateFlow(false)
+    /** true si la última llamada a la API falló por red: se muestran los datos guardados. */
+    val sinConexion: StateFlow<Boolean> = _sinConexion.asStateFlow()
+
+    private val _ultimaSincronizacion = MutableStateFlow<Long?>(null)
+    /** Momento (epoch millis) de la última sincronización con la API, o null si no hubo. */
+    val ultimaSincronizacion: StateFlow<Long?> = _ultimaSincronizacion.asStateFlow()
+
+    /**
+     * Primero muestra los datos guardados en el teléfono (si los hay) y luego descarga
+     * usuario, categorías y movimientos de la API y actualiza la copia local.
+     */
     suspend fun cargar() = coroutineScope {
         val usuarioId = checkNotNull(SesionActual.usuario) { "No hay una sesión iniciada" }.id
+
+        val estado = _state.value
+        if (estado.categorias.isEmpty() && estado.movimientos.isEmpty()) {
+            leerCache(usuarioId)?.let { guardados ->
+                _state.value = guardados.state
+                _ultimaSincronizacion.value = guardados.sincronizadoEn
+            }
+        }
+
         val usuario = async { api.obtenerUsuario(usuarioId) }
         val categorias = async { api.listarCategorias() }
         val movimientos = async { api.listarMovimientos() }
@@ -64,22 +93,70 @@ class ApiFinanzasRepository(
             categorias = categorias.await().map { it.aModelo() },
             movimientos = movimientos.await().map { it.aModelo() }
         )
+        _sinConexion.value = false
+        guardarCache()
     }
-
-    private val _cargando = MutableStateFlow(false)
-    /** true mientras se descargan los datos de la sesión. */
-    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
 
     fun recargar() {
         _cargando.value = true
-        ejecutar(alFallar = { _cargando.value = false }) {
-            cargar()
-            _cargando.value = false
+        scope.launch {
+            try {
+                cargar()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: IOException) {
+                _sinConexion.value = true
+                val hayDatos = _state.value.categorias.isNotEmpty() || _state.value.movimientos.isNotEmpty()
+                _errores.tryEmit(
+                    if (hayDatos) "Sin conexión: estás viendo los datos guardados en tu teléfono."
+                    else ClienteApi.mensajeDeError(e)
+                )
+            } catch (e: Exception) {
+                _errores.tryEmit(ClienteApi.mensajeDeError(e))
+            } finally {
+                _cargando.value = false
+            }
         }
     }
 
+    /** Limpia la memoria. Los datos guardados se borran aparte con [borrarDatosLocales]. */
     fun limpiar() {
         _state.value = FinanzasState()
+        _sinConexion.value = false
+        _ultimaSincronizacion.value = null
+    }
+
+    /** Borra la copia local del usuario (al cerrar sesión). */
+    suspend fun borrarDatosLocales(usuarioId: Long) {
+        try {
+            cache?.borrar(usuarioId)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Si falla, la caché se reemplaza en la próxima sincronización de ese usuario
+        }
+    }
+
+    private suspend fun leerCache(usuarioId: Long) =
+        try {
+            cache?.leer(usuarioId)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+
+    /** Guarda el estado actual en el teléfono (tras sincronizar o tras un cambio confirmado). */
+    private suspend fun guardarCache() {
+        val usuarioId = SesionActual.usuario?.id ?: return
+        try {
+            cache?.guardar(usuarioId, _state.value)
+            _ultimaSincronizacion.value = System.currentTimeMillis()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // La caché es opcional: si falla, la app sigue funcionando con la API
+        }
     }
 
     override fun establecerSaldoInicial(monto: Long): Boolean {
@@ -260,11 +337,19 @@ class ApiFinanzasRepository(
         scope.launch {
             try {
                 accion()
+                // La API confirmó el cambio: hay conexión y se actualiza la copia local
+                _sinConexion.value = false
+                guardarCache()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 alFallar()
-                _errores.tryEmit(ClienteApi.mensajeDeError(e))
+                if (e is IOException) {
+                    _sinConexion.value = true
+                    _errores.tryEmit("Sin conexión: el cambio no se guardó. Inténtalo de nuevo cuando tengas internet.")
+                } else {
+                    _errores.tryEmit(ClienteApi.mensajeDeError(e))
+                }
             }
         }
     }

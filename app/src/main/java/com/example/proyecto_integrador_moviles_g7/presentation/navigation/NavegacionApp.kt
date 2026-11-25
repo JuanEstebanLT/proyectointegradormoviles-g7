@@ -9,6 +9,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.proyecto_integrador_moviles_g7.data.network.SesionActual
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -100,6 +103,8 @@ fun NavegacionApp(
     val cuenta = sessionViewModel.cuenta
     val context = LocalContext.current
     val cargando by repository.cargando.collectAsStateWithLifecycle()
+    val sinConexion by repository.sinConexion.collectAsStateWithLifecycle()
+    val ultimaSincronizacion by repository.ultimaSincronizacion.collectAsStateWithLifecycle()
     val usuario by cuenta.usuario.collectAsStateWithLifecycle()
 
     // Los fallos de la API en segundo plano se informan sin bloquear la pantalla
@@ -146,11 +151,27 @@ fun NavegacionApp(
     }
     val iniciales = usuario?.iniciales ?: "G7"
 
+    // Token vencido o inválido (401): se cierra la sesión guardada y se vuelve a Acceso
+    LaunchedEffect(Unit) {
+        SesionActual.expirada.collect {
+            Toast.makeText(context, "Tu sesión expiró. Vuelve a iniciar sesión.", Toast.LENGTH_LONG).show()
+            cerrarSesion()
+        }
+    }
+
     NavHost(navController = navController, startDestination = inicio) {
         composable(Rutas.SPLASH) {
+            val scope = rememberCoroutineScope()
             SplashScreen(onTerminar = {
-                val destino = if (onboardingVisto(context)) Rutas.ACCESO else Rutas.ONBOARDING
-                navController.navigate(destino) { popUpTo(Rutas.SPLASH) { inclusive = true } }
+                scope.launch {
+                    // Con sesión guardada en el teléfono se entra directo al Dashboard
+                    if (sessionViewModel.restaurarSesion()) {
+                        navController.irAlDashboard()
+                    } else {
+                        val destino = if (onboardingVisto(context)) Rutas.ACCESO else Rutas.ONBOARDING
+                        navController.navigate(destino) { popUpTo(Rutas.SPLASH) { inclusive = true } }
+                    }
+                }
             })
         }
         composable(Rutas.ONBOARDING) {
@@ -199,6 +220,9 @@ fun NavegacionApp(
             DashboardScreen(
                 viewModel = dashboardViewModel,
                 cargando = cargando,
+                sinConexion = sinConexion,
+                ultimaSincronizacion = ultimaSincronizacion,
+                onReintentar = { repository.recargar() },
                 onSeccion = irASeccion,
                 onPerfil = { irA(Rutas.PERFIL) },
                 onNotificaciones = { irA(Rutas.NOTIFICACIONES) },
