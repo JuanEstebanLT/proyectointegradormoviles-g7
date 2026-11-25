@@ -3,6 +3,8 @@ package com.example.proyecto_integrador_moviles_g7.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.proyecto_integrador_moviles_g7.data.local.ProveedorLocal
+import com.example.proyecto_integrador_moviles_g7.data.network.SesionActual
 import com.example.proyecto_integrador_moviles_g7.data.repository.ApiFinanzasRepository
 import com.example.proyecto_integrador_moviles_g7.data.repository.AuthRepository
 import com.example.proyecto_integrador_moviles_g7.data.repository.CuentaRepository
@@ -46,16 +48,37 @@ class FinanzasSessionViewModel(application: Application) : AndroidViewModel(appl
         notificador.publicarNuevas(usuario.id, AnalisisFinanciero.notificaciones(repository.state.value, cuenta.metaAhorro.value))
     }
 
-    /** Descarga los datos del usuario recién autenticado. */
+    /**
+     * Prepara la sesión del usuario autenticado: muestra al instante lo guardado en el teléfono
+     * y luego sincroniza con la API.
+     */
     fun alIniciarSesion() {
         cuenta.sincronizarUsuario()
         repository.recargar()
-        viewModelScope.launch { cuenta.cargarConfiguracion() }
+        viewModelScope.launch {
+            cuenta.cargarDatosLocales()
+            cuenta.cargarConfiguracion()
+        }
     }
 
+    /**
+     * Si hay una sesión guardada en el teléfono la recupera y carga los datos.
+     * Devuelve true si el usuario puede entrar directo al Dashboard.
+     */
+    suspend fun restaurarSesion(): Boolean {
+        if (SesionActual.token == null && !SesionActual.restaurar()) return false
+        alIniciarSesion()
+        return true
+    }
+
+    /** Cierra la sesión y borra del teléfono el token y la copia de los datos. */
     fun cerrarSesion() {
+        val usuarioId = SesionActual.usuario?.id
         authRepository.cerrarSesion()
         repository.limpiar()
         cuenta.limpiar()
+        if (usuarioId != null) {
+            ProveedorLocal.scope.launch { repository.borrarDatosLocales(usuarioId) }
+        }
     }
 }

@@ -24,10 +24,15 @@ object ClienteApi {
         .addInterceptor { cadena ->
             val peticion = cadena.request()
             val token = SesionActual.token
-            cadena.proceed(
+            val respuesta = cadena.proceed(
                 if (token == null) peticion
                 else peticion.newBuilder().header("Authorization", "Bearer $token").build()
             )
+            // Con sesión iniciada, un 401 significa que el token venció: hay que volver a Acceso
+            if (respuesta.code == 401 && token != null && token == SesionActual.token) {
+                SesionActual.notificarExpirada()
+            }
+            respuesta
         }
         .apply {
             // El cuerpo (y el token) solo se registra en compilaciones de depuración

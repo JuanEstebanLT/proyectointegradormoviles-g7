@@ -1,19 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copias de seguridad en Android 12 o superior (nube y transferencia entre dispositivos).
+   El token de sesión y la caché local no salen del teléfono.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="file" path="datastore/sesion_finanzas_g7.preferences_pb" />
+        <exclude domain="database" path="finanzas_g7.db" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="file" path="datastore/sesion_finanzas_g7.preferences_pb" />
+        <exclude domain="database" path="finanzas_g7.db" />
     </device-transfer>
-    -->
 </data-extraction-rules>
